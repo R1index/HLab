@@ -35,10 +35,11 @@ export function upsertPlayer(state: State, discordId: string): Player {
     p = state.players[discordId] = {
       id: discordId,
       money: cfg.player_start.money,
-      unique: { INSECT: 0, BEAST: 0, MONSTER: 0, CREATURE: 0 },
+      unique: { ...cfg.player_start.unique },
       lab_level: cfg.player_start.lab_level,
       created_at: nowIso(),
-      rooms: { girl: cfg.rooms.start_girl_rooms, creature: cfg.rooms.start_creature_rooms }
+      rooms: { girl: cfg.rooms.start_girl_rooms, creature: cfg.rooms.start_creature_rooms },
+      starter_claimed: false
     };
     // Pre-create empty rooms for the player
     for (let i = 0; i < p.rooms.girl; i++) {

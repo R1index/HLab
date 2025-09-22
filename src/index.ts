@@ -3,7 +3,7 @@ import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { load, persist, upsertPlayer } from './db.js';
 import { loadConfig } from './config.js';
 import { loadGirlTemplates } from './girls.js';
-import { doLazyTick, performGacha, assign as doAssign, sellPrice } from './logic.js';
+import { doLazyTick, performGacha, assign as doAssign, sellPrice, createStarterGirl, createStarterCreature } from './logic.js';
 import { creatureEmbed, girlEmbed, roomsEmbed } from './ui.js';
 
 const client = new Client({
@@ -28,6 +28,31 @@ client.on('interactionCreate', async (interaction) => {
     // Lazy tick for all assignments of this player on every action
     Object.values(state.assignments).filter(a=>a.owner_id===userId && a.active).forEach(a=>doLazyTick(state, player, a));
     persist(state);
+
+    if (interaction.commandName === 'start') {
+      const hasGirls = Object.values(state.girls).some(g => g.owner_id === userId);
+      const hasCreatures = Object.values(state.creatures).some(c => c.owner_id === userId);
+      if (player.starter_claimed || hasGirls || hasCreatures) {
+        if (!player.starter_claimed && (hasGirls || hasCreatures)) {
+          player.starter_claimed = true;
+          persist(state);
+        }
+        return interaction.reply({ content: 'You have already claimed your starter bundle.', ephemeral: true });
+      }
+      try {
+        const girl = createStarterGirl(state, player);
+        const creature = createStarterCreature(state, player);
+        player.starter_claimed = true;
+        persist(state);
+        await interaction.reply({
+          content: `🧪 Welcome to the lab! You've received **${girl.name}** and a starter creature.`,
+          embeds: [girlEmbed(girl), creatureEmbed(creature)],
+          ephemeral: true
+        });
+      } catch (e:any) {
+        await interaction.reply({ content: `Error: ${e.message}`, ephemeral: true });
+      }
+    }
 
     if (interaction.commandName === 'profile') {
       await interaction.reply({

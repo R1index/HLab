@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { REST, Routes, SlashCommandBuilder } from 'discord.js';
 
 const commands = [
+  new SlashCommandBuilder().setName('start').setDescription('Claim your starter girl and creature'),
   new SlashCommandBuilder().setName('profile').setDescription('Show your profile'),
   new SlashCommandBuilder().setName('girls').setDescription('List your girls'),
   new SlashCommandBuilder().setName('creatures').setDescription('List your creatures'),
