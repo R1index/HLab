@@ -1,5 +1,5 @@
 import type { Assignment, Config, Creature, Girl, Player, Spec, State } from './types.js';
-import { aid, cid, nowIso } from './id.js';
+import { aid, cid, gid, nowIso } from './id.js';
 import { loadConfig } from './config.js';
 import { loadGirlTemplates } from './girls.js';
 
@@ -59,6 +59,50 @@ export function performGacha(state: State, player: Player, spec: Spec): Girl {
   };
   state.girls[girl.id] = girl;
   return girl;
+}
+
+export function createStarterGirl(state: State, player: Player): Girl {
+  const girlsFile = loadGirlTemplates();
+  const starters = girlsFile.girls.filter(g => g.profile?.tags?.includes('starter'));
+  if (!starters.length) throw new Error('No starter girls configured.');
+  const template = starters[Math.floor(Math.random() * starters.length)];
+  const girl: Girl = {
+    id: gid(),
+    owner_id: player.id,
+    template_id: template.template_id,
+    name: template.name,
+    spec: template.specialization,
+    health: template.base_stats.health,
+    energy: template.base_stats.energy,
+    strength: template.base_stats.strength,
+    stamina: template.base_stats.stamina,
+    status: 'free',
+    room_id: null,
+    created_at: nowIso()
+  };
+  state.girls[girl.id] = girl;
+  return girl;
+}
+
+export function createStarterCreature(state: State, player: Player): Creature {
+  const cfg = loadConfig();
+  const starters = cfg.player_start?.starter_creatures ?? [];
+  if (!starters.length) throw new Error('No starter creatures configured.');
+  const template = starters[Math.floor(Math.random() * starters.length)];
+  const creature: Creature = {
+    id: cid(),
+    owner_id: player.id,
+    spec: template.spec,
+    size: template.stats.size,
+    strength: template.stats.strength,
+    health: template.stats.health,
+    stamina: template.stats.stamina,
+    room_id: null,
+    parents: null,
+    created_at: nowIso()
+  };
+  state.creatures[creature.id] = creature;
+  return creature;
 }
 
 // lightweight unique string; in production use ulid()

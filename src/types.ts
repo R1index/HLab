@@ -75,6 +75,7 @@ export interface Player {
   lab_level: number;
   created_at: string;
   rooms: { girl: number; creature: number };
+  starter_claimed?: boolean;
 }
 
 export interface Config {
@@ -126,6 +127,7 @@ export interface Config {
     lab_level: number;
     unlocked_specs: Spec[];
     inventory_caps: { girls: number; creatures: number };
+    starter_creatures?: { spec: Spec; stats: { size: number; strength: number; health: number; stamina: number } }[];
   };
   pagination: { page_size_default: number; page_size_max: number; use_cursor: boolean };
 }
