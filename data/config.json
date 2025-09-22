@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "updated_at": "2025-09-22T12:43:52Z",
+  "economy": {
+    "money_to_unique_rate": 0.5,
+    "sell_creature_base_price": 50,
+    "sell_price_per_stat_sum": 0.8,
+    "auto_sell_on_no_rooms": true
+  },
+  "production": {
+    "base_currency_per_hour": 1.0,
+    "bonus_currency_per_hour": 2.0,
+    "tick_minutes": 10,
+    "pregnancy_roll_per_tick": true
+  },
+  "energy": {
+    "drain_formula": "girl.energy -= (creature.sum_stats / 200) * girl.energy_drain_factor * tickHours",
+    "min_energy_to_assign": 5,
+    "rest_regen_per_hour": 12,
+    "auto_rest_on_zero": true
+  },
+  "lab": {
+    "level_start": 1,
+    "level_max": 20,
+    "upgrade_cost_base": 200,
+    "upgrade_cost_mult": 1.35,
+    "effects": {
+      "currency_mult_per_level": 0.03,
+      "pregnancy_add_per_level": 0.002,
+      "energy_drain_reduction_per_level": 0.01,
+      "girls_room_plus_every": 3,
+      "creatures_room_plus_every": 2
+    }
+  },
+  "rooms": {
+    "start_girl_rooms": 3,
+    "start_creature_rooms": 4,
+    "max_rooms_cap": 200
+  },
+  "gacha": {
+    "cost": {
+      "INSECT": 5,
+      "BEAST": 5,
+      "MONSTER": 5,
+      "CREATURE": 5
+    },
+    "pity": {
+      "enabled": true,
+      "pity_at": 30,
+      "forces_min_rarity": "SR"
+    }
+  },
+  "constraints": {
+    "must_match_specialization": true,
+    "one_creature_per_room": true,
+    "no_gacha_if_girl_rooms_full": true
+  },
+  "player_start": {
+    "money": 500,
+    "unique": {
+      "INSECT": 500,
+      "BEAST": 500,
+      "MONSTER": 500,
+      "CREATURE": 500
+    },
+    "lab_level": 1,
+    "unlocked_specs": [
+      "INSECT",
+      "BEAST",
+      "MONSTER",
+      "CREATURE"
+    ],
+    "inventory_caps": {
+      "girls": 9999,
+      "creatures": 9999
+    },
+    "starter_creatures": [
+      {
+        "spec": "CREATURE",
+        "stats": { "size": 5, "strength": 5, "health": 10, "stamina": 5 }
+      }
+    ]
+  },
+  "pagination": {
+    "page_size_default": 10,
+    "page_size_max": 25,
+    "use_cursor": true
+  }
+}
+

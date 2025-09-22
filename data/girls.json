@@ -1,0 +1,1336 @@
+{
+  "version": 1,
+  "updated_at": "2025-09-22T13:16:31Z",
+  "girls": [
+    {
+      "template_id": "GT_WM450XXTDHS359QOE95DQZKUID",
+      "name": "Astra",
+      "specialization": "INSECT",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 35
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Astra listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/astra.png"
+      }
+    },
+    {
+      "template_id": "GT_IZ3GFMDII0BORTXJVA5F65XSTS",
+      "name": "Vespa",
+      "specialization": "INSECT",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 35
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Vespa listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/vespa.png"
+      }
+    },
+    {
+      "template_id": "GT_ZBJ17W0KPLZAKEU9435UJCFXH3",
+      "name": "Mantis",
+      "specialization": "INSECT",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 35
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Mantis listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/mantis.png"
+      }
+    },
+    {
+      "template_id": "GT_5O7TNDMJC3B20E5OW4AOXEPXY7",
+      "name": "Silka",
+      "specialization": "INSECT",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 45
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Silka listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/silka.png"
+      }
+    },
+    {
+      "template_id": "GT_2BBCNZKQD5S4D6C78VKGL6NRG4",
+      "name": "Nectar",
+      "specialization": "INSECT",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 45
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Nectar listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/nectar.png"
+      }
+    },
+    {
+      "template_id": "GT_1DGOH8P67YA4FGHSAYM5QV5QSD",
+      "name": "Hexa",
+      "specialization": "INSECT",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 45
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Hexa listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/hexa.png"
+      }
+    },
+    {
+      "template_id": "GT_30KHGILSJ5C0THTC9BBOJXZI2N",
+      "name": "Mira",
+      "specialization": "INSECT",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Mira listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/mira.png"
+      }
+    },
+    {
+      "template_id": "GT_VU7PYT0ZOG0P2TVZXC0TVPNJFJ",
+      "name": "Iris",
+      "specialization": "INSECT",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Iris listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/iris.png"
+      }
+    },
+    {
+      "template_id": "GT_XEGBP8JDIMCZJSKLUK0UC0Q3EL",
+      "name": "Thorn",
+      "specialization": "INSECT",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Thorn listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/thorn.png"
+      }
+    },
+    {
+      "template_id": "GT_D3NX7FB6SB6K1H3K48W4GFK8B2",
+      "name": "Pollen",
+      "specialization": "INSECT",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 60
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Pollen listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/pollen.png"
+      }
+    },
+    {
+      "template_id": "GT_HT9GMFCYXG92ZLQBY3TQ5GZXX4",
+      "name": "Weaver",
+      "specialization": "INSECT",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 60
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Weaver listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/weaver.png"
+      }
+    },
+    {
+      "template_id": "GT_01E2BWUBFP9P251DALP01HDOB8",
+      "name": "Naiad",
+      "specialization": "INSECT",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 60
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Naiad listens to the hum of the hive.",
+        "tags": [
+          "tactics",
+          "control"
+        ],
+        "portrait": "res://portraits/naiad.png"
+      }
+    },
+    {
+      "template_id": "GT_ZB52LB5U56YBTMB1GCYRF3ZS62",
+      "name": "Rina",
+      "specialization": "BEAST",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 30,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Rina roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/rina.png"
+      }
+    },
+    {
+      "template_id": "GT_Y1GQIVBVLK69IZREHLL8QP0NYS",
+      "name": "Lyra",
+      "specialization": "BEAST",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 30,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Lyra roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/lyra.png"
+      }
+    },
+    {
+      "template_id": "GT_XMQTP4CKRD4LSUM4FAIMXMQD8Q",
+      "name": "Faun",
+      "specialization": "BEAST",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 55,
+        "strength": 30,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Faun roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/faun.png"
+      }
+    },
+    {
+      "template_id": "GT_X6QW0V9145K43LA3C72AXZEL5G",
+      "name": "Kaya",
+      "specialization": "BEAST",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 45,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Kaya roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/kaya.png"
+      }
+    },
+    {
+      "template_id": "GT_6BBTGXJWG7XUEHYY13OUJRS6KL",
+      "name": "Sable",
+      "specialization": "BEAST",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 45,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Sable roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/sable.png"
+      }
+    },
+    {
+      "template_id": "GT_RSR217WKD7SI0V9FRRATC9XVF1",
+      "name": "Mara",
+      "specialization": "BEAST",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 65,
+        "strength": 45,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Mara roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/mara.png"
+      }
+    },
+    {
+      "template_id": "GT_KCHLZY556S8DE45VTSJB2W89LO",
+      "name": "Kora",
+      "specialization": "BEAST",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 55,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Kora roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/kora.png"
+      }
+    },
+    {
+      "template_id": "GT_ZRAQXGTEBOGWI7A0D9U9UAU1AG",
+      "name": "Luna",
+      "specialization": "BEAST",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 55,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Luna roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/luna.png"
+      }
+    },
+    {
+      "template_id": "GT_Q9GI5XVG79DAFZRZYDNOSETTAD",
+      "name": "Valk",
+      "specialization": "BEAST",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 75,
+        "strength": 55,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Valk roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/valk.png"
+      }
+    },
+    {
+      "template_id": "GT_C94UBV9FO15GZC154R40R8GBAI",
+      "name": "Rhea",
+      "specialization": "BEAST",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 65,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Rhea roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/rhea.png"
+      }
+    },
+    {
+      "template_id": "GT_S9Y18REMG42R3XDG73NKH94TUS",
+      "name": "Nova",
+      "specialization": "BEAST",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 65,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Nova roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/nova.png"
+      }
+    },
+    {
+      "template_id": "GT_RM1FE5SKXYCPI8ZXK8Z70M5LZU",
+      "name": "Nyx",
+      "specialization": "BEAST",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 85,
+        "strength": 65,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Nyx roams the wild trails with steady steps.",
+        "tags": [
+          "balanced",
+          "reliable"
+        ],
+        "portrait": "res://portraits/nyx.png"
+      }
+    },
+    {
+      "template_id": "GT_SBRZNNK4PBCCA937OGW7ETT0WU",
+      "name": "Mora",
+      "specialization": "MONSTER",
+      "rarity": "N",
+      "base_stats": {
+        "health": 65,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Mora whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/mora.png"
+      }
+    },
+    {
+      "template_id": "GT_OK4CCF9MLSIWKJ7M7MB1OSAQH2",
+      "name": "Noctis",
+      "specialization": "MONSTER",
+      "rarity": "N",
+      "base_stats": {
+        "health": 65,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Noctis whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/noctis.png"
+      }
+    },
+    {
+      "template_id": "GT_PY3YNQRVQ0L6L9I7KLYJIBUOOT",
+      "name": "Basil",
+      "specialization": "MONSTER",
+      "rarity": "N",
+      "base_stats": {
+        "health": 65,
+        "energy": 55,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Basil whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/basil.png"
+      }
+    },
+    {
+      "template_id": "GT_IVC7A9HV1DQP5J68IXDYFNP2F3",
+      "name": "Lilith",
+      "specialization": "MONSTER",
+      "rarity": "R",
+      "base_stats": {
+        "health": 85,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Lilith whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/lilith.png"
+      }
+    },
+    {
+      "template_id": "GT_KQRJ1T55BF90IB28T704F3BG2B",
+      "name": "Sablex",
+      "specialization": "MONSTER",
+      "rarity": "R",
+      "base_stats": {
+        "health": 85,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Sablex whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/sablex.png"
+      }
+    },
+    {
+      "template_id": "GT_4VLYVGTS73JTSI3VQ6HCKEWSA2",
+      "name": "Kaia",
+      "specialization": "MONSTER",
+      "rarity": "R",
+      "base_stats": {
+        "health": 85,
+        "energy": 65,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Kaia whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/kaia.png"
+      }
+    },
+    {
+      "template_id": "GT_MQ4WLH95Q9YM70KNC995I6ZGEH",
+      "name": "Vorra",
+      "specialization": "MONSTER",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 100,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Vorra whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/vorra.png"
+      }
+    },
+    {
+      "template_id": "GT_K0ARHORK6DI2UDOKO6YLT9KUGX",
+      "name": "Eris",
+      "specialization": "MONSTER",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 100,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Eris whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/eris.png"
+      }
+    },
+    {
+      "template_id": "GT_QP8NNN6HNGS6Z4YPP4C1J7FYHQ",
+      "name": "Nymera",
+      "specialization": "MONSTER",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 100,
+        "energy": 75,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Nymera whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/nymera.png"
+      }
+    },
+    {
+      "template_id": "GT_JGIMZOE92LL0121DEH1W4JS9ST",
+      "name": "Arachne",
+      "specialization": "MONSTER",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 115,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Arachne whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/arachne.png"
+      }
+    },
+    {
+      "template_id": "GT_M6OWLHQUYNGVQEM1RVZ302KSO8",
+      "name": "Banshee",
+      "specialization": "MONSTER",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 115,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Banshee whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/banshee.png"
+      }
+    },
+    {
+      "template_id": "GT_NPP2A82FB5BBQKU6NMTQ24LHOY",
+      "name": "Medra",
+      "specialization": "MONSTER",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 115,
+        "energy": 85,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Medra whispers back to the abyss.",
+        "tags": [
+          "late bloomer",
+          "burst"
+        ],
+        "portrait": "res://portraits/medra.png"
+      }
+    },
+    {
+      "template_id": "GT_71A6180PC17IASSDKNNBT5609R",
+      "name": "Lian",
+      "specialization": "CREATURE",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 60,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Lian learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/lian.png"
+      }
+    },
+    {
+      "template_id": "GT_ED47N5KZX4G97CNXD5A7QAQYWO",
+      "name": "Edda",
+      "specialization": "CREATURE",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 60,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Edda learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/edda.png"
+      }
+    },
+    {
+      "template_id": "GT_7RPG44AWL7ZQ44ZTHKG1GUWWSP",
+      "name": "Syl",
+      "specialization": "CREATURE",
+      "rarity": "N",
+      "base_stats": {
+        "health": 60,
+        "energy": 60,
+        "strength": 25,
+        "stamina": 30
+      },
+      "energy_drain_factor": 1.05,
+      "pregnancy_chance_base": 0.05,
+      "bonuses": {
+        "currency_per_hour_mult": 0.95,
+        "energy_drain_mult": 1.05,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Syl learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/syl.png"
+      }
+    },
+    {
+      "template_id": "GT_4I1ZPA885LW8ZD9TZZ50IJIW4F",
+      "name": "Kiri",
+      "specialization": "CREATURE",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 70,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Kiri learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/kiri.png"
+      }
+    },
+    {
+      "template_id": "GT_Y9Z3ERFHL1Z0T1I4269ZCIBJW8",
+      "name": "Ari",
+      "specialization": "CREATURE",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 70,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Ari learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/ari.png"
+      }
+    },
+    {
+      "template_id": "GT_70S7XHWRFMH8L8CDOG4L2QJUMQ",
+      "name": "Tali",
+      "specialization": "CREATURE",
+      "rarity": "R",
+      "base_stats": {
+        "health": 80,
+        "energy": 70,
+        "strength": 40,
+        "stamina": 40
+      },
+      "energy_drain_factor": 1.0,
+      "pregnancy_chance_base": 0.06,
+      "bonuses": {
+        "currency_per_hour_mult": 1.0,
+        "energy_drain_mult": 1.0,
+        "pregnancy_chance_add": 0.0
+      },
+      "profile": {
+        "bio": "Tali learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/tali.png"
+      }
+    },
+    {
+      "template_id": "GT_OCHLT2QVU7T1HSVU6N21NV0RSZ",
+      "name": "Sora",
+      "specialization": "CREATURE",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 80,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Sora learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/sora.png"
+      }
+    },
+    {
+      "template_id": "GT_CU20GCJ1W8TR1C8GR9Y8M605RE",
+      "name": "Vera",
+      "specialization": "CREATURE",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 80,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Vera learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/vera.png"
+      }
+    },
+    {
+      "template_id": "GT_Q45ZG8O1TYBCBHKIVYBR03OFYE",
+      "name": "Mina",
+      "specialization": "CREATURE",
+      "rarity": "SR",
+      "base_stats": {
+        "health": 95,
+        "energy": 80,
+        "strength": 50,
+        "stamina": 50
+      },
+      "energy_drain_factor": 0.97,
+      "pregnancy_chance_base": 0.07,
+      "bonuses": {
+        "currency_per_hour_mult": 1.08,
+        "energy_drain_mult": 0.97,
+        "pregnancy_chance_add": 0.005
+      },
+      "profile": {
+        "bio": "Mina learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/mina.png"
+      }
+    },
+    {
+      "template_id": "GT_Q2PA3M0TX62Y05S55M01AGR7XN",
+      "name": "Nami",
+      "specialization": "CREATURE",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 90,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Nami learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/nami.png"
+      }
+    },
+    {
+      "template_id": "GT_5VUFB7M4DRQTI96ZI6BXOKN06H",
+      "name": "Zia",
+      "specialization": "CREATURE",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 90,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Zia learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/zia.png"
+      }
+    },
+    {
+      "template_id": "GT_FNQEQSQALJ9R3N42FU427HBVQP",
+      "name": "Pia",
+      "specialization": "CREATURE",
+      "rarity": "SSR",
+      "base_stats": {
+        "health": 110,
+        "energy": 90,
+        "strength": 60,
+        "stamina": 55
+      },
+      "energy_drain_factor": 0.93,
+      "pregnancy_chance_base": 0.08,
+      "bonuses": {
+        "currency_per_hour_mult": 1.15,
+        "energy_drain_mult": 0.92,
+        "pregnancy_chance_add": 0.01
+      },
+      "profile": {
+        "bio": "Pia learns fast in the lab corridors.",
+        "tags": [
+          "starter",
+          "support"
+        ],
+        "portrait": "res://portraits/pia.png"
+      }
+    }
+  ],
+  "gacha_pools": {
+    "INSECT": {
+      "weights_by_rarity": {
+        "SSR": 3,
+        "SR": 10,
+        "R": 27,
+        "N": 60
+      }
+    },
+    "BEAST": {
+      "weights_by_rarity": {
+        "SSR": 3,
+        "SR": 10,
+        "R": 27,
+        "N": 60
+      }
+    },
+    "MONSTER": {
+      "weights_by_rarity": {
+        "SSR": 3,
+        "SR": 10,
+        "R": 27,
+        "N": 60
+      }
+    },
+    "CREATURE": {
+      "weights_by_rarity": {
+        "SSR": 3,
+        "SR": 10,
+        "R": 27,
+        "N": 60
+      }
+    }
+  }
+}
