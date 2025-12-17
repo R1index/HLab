@@ -228,12 +228,12 @@ export const HomeScreen: React.FC<Props> = ({ state, onSetTheme }) => {
                 </div>
 
                 {FACTION_TEMPLATES.map(faction => {
-                    // Fix: Check level directly as getFactionRank is deprecated/broken for UI checks
                     const factionState = state.factions[faction.id];
                     const level = factionState ? factionState.level : 1;
+                    const rank = getFactionRank(level);
                     // Theme unlocks at Partner rank (Level 10)
-                    const isUnlocked = level >= 10;
-                    
+                    const isUnlocked = ['Partner', 'Elite', 'Legend'].includes(rank);
+
                     const isActive = state.activeTheme === faction.id;
                     const fStyles = FACTION_STYLES[faction.id];
 
@@ -253,15 +253,22 @@ export const HomeScreen: React.FC<Props> = ({ state, onSetTheme }) => {
                                     : isUnlocked ? 'bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800' : ''}
                             `}
                         >
-                            <div className="flex items-center gap-3 relative z-10">
-                                <div className={`w-3 h-3 rounded-full ${fStyles.dot} ${isActive ? 'shadow-[0_0_8px_currentColor]' : ''}`}></div>
-                                <div className="flex flex-col">
-                                    <span className="text-xs font-bold font-mono uppercase">{faction.name}</span>
-                                    {!isUnlocked && <span className="text-[9px] text-red-500 flex items-center gap-1"><ShieldCheck size={8}/> LOCKED (REQ: PARTNER)</span>}
+                                <div className="flex items-center gap-3 relative z-10">
+                                    <div className={`w-3 h-3 rounded-full ${fStyles.dot} ${isActive ? 'shadow-[0_0_8px_currentColor]' : ''}`}></div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-bold font-mono uppercase">{faction.name}</span>
+                                        {!isUnlocked && (
+                                            <span className="text-[9px] text-red-500 flex items-center gap-1">
+                                                <ShieldCheck size={8} /> LOCKED (REQ: PARTNER)
+                                            </span>
+                                        )}
+                                        {isUnlocked && (
+                                            <span className="text-[9px] text-slate-500 font-mono">RANK: {rank.toUpperCase()}</span>
+                                        )}
+                                    </div>
                                 </div>
+                                {isActive && <CheckCircle size={14} className={fStyles.text} />}
                             </div>
-                            {isActive && <CheckCircle size={14} className={fStyles.text} />}
-                        </div>
                     );
                 })}
             </div>

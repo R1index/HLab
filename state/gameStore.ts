@@ -16,7 +16,9 @@ const STORAGE_KEY = 'PRIVATE_LAB_SAVE_V1';
 
 export const useGameStore = () => {
   const [state, setState] = useState<GameState>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = (typeof window !== 'undefined' && window.localStorage)
+        ? window.localStorage.getItem(STORAGE_KEY)
+        : null;
     let loadedState: Partial<GameState> = {};
     if (saved) {
       try {
@@ -95,7 +97,9 @@ export const useGameStore = () => {
   useEffect(() => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
     }, 1000);
   }, [state]);
 

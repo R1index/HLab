@@ -43,6 +43,16 @@ const FACTION_QUOTES: Record<string, string[]> = {
     'neon_covenant': [ "Praise the machine god.", "The glitch is divine.", "We are the ghost in the shell." ]
 };
 
+const FACTION_GRADIENTS: Record<string, string> = {
+    blue: '#0ea5e9',
+    red: '#ef4444',
+    emerald: '#10b981',
+    violet: '#8b5cf6',
+    orange: '#f97316',
+    lime: '#84cc16',
+    fuchsia: '#d946ef'
+};
+
 // --- Helper Functions ---
 
 const getModifierIcon = (mod: string) => {
@@ -155,7 +165,12 @@ const FactionHeader = ({ faction, directorId }: { faction: Faction, directorId: 
             animate-in fade-in slide-in-from-right-4 duration-300 shadow-xl
         `}>
             {/* Background elements */}
-            <div className={`absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-${faction.color}-900/20 to-transparent pointer-events-none`} />
+            <div
+                className="absolute top-0 right-0 w-64 h-full pointer-events-none"
+                style={{
+                    background: `linear-gradient(90deg, transparent, ${FACTION_GRADIENTS[faction.color] || '#22c55e'}33)`
+                }}
+            />
             <div className="absolute -bottom-4 -right-4 text-slate-800/20">
                 <Globe size={180} />
             </div>
@@ -235,16 +250,18 @@ const ContractCard = React.memo(({
     onStart,
     onTradeStart,
     isAccepting,
-    onHoverMod 
-}: { 
-    contract: Contract, 
-    canAfford: boolean, 
-    bonuses: GameBonuses, 
-    styles: any, 
+    onHoverMod,
+    currentCredits
+}: {
+    contract: Contract,
+    canAfford: boolean,
+    bonuses: GameBonuses,
+    styles: any,
     onStart: (c: Contract) => void,
     onTradeStart: (c: Contract) => void,
     isAccepting: boolean,
-    onHoverMod: (id: string, mod: string, rect: DOMRect) => void
+    onHoverMod: (id: string, mod: string, rect: DOMRect) => void,
+    currentCredits: number
 }) => {
     const isTrade = contract.kind === 'TRADE';
     
@@ -310,6 +327,8 @@ const ContractCard = React.memo(({
         const sec = s % 60;
         return `${m}:${sec.toString().padStart(2, '0')}`;
     };
+
+    const missingCredits = Math.max(0, contract.deposit - currentCredits);
 
     return (
         <div className={`
@@ -432,10 +451,10 @@ const ContractCard = React.memo(({
                         </div>
                         <ChevronRight size={14} className="ml-1 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </>
-                 ) : (
+                    ) : (
                     <div className="flex items-center gap-1 text-red-500/70">
                         <LockKeyhole size={12} />
-                        <span>MISSING {contract.deposit - 0} CR</span>
+                        <span>MISSING {missingCredits} CR</span>
                     </div>
                  )}
             </button>
@@ -646,6 +665,7 @@ export const ContractsScreen: React.FC<Props> = ({ state, onCompleteContract, on
                                 onTradeStart={handleTradeStart}
                                 isAccepting={isAccepting}
                                 onHoverMod={handleHoverMod}
+                                currentCredits={state.resources.credits}
                             />
                         ))}
                     </div>
