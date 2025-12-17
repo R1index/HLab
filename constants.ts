@@ -19,9 +19,12 @@ export const getXpForNextLevel = (currentLevel: number) => {
     return Math.floor(XP_PER_LEVEL_BASE * Math.pow(currentLevel, 2.2));
 };
 
-export const getFactionRank = (reputation: number): FactionRank => {
-    // Rank is now based on Level, not raw reputation number (since rep resets)
-    return 'Neutral'; 
+export const getFactionRank = (level: number): FactionRank => {
+    if (level >= 100) return 'Legend';
+    if (level >= 50) return 'Elite';
+    if (level >= 10) return 'Partner';
+    if (level >= 2) return 'Associate';
+    return 'Neutral';
 };
 
 // --- Cycle & Fertility Logic ---

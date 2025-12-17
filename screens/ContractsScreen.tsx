@@ -43,6 +43,16 @@ const FACTION_QUOTES: Record<string, string[]> = {
     'neon_covenant': [ "Praise the machine god.", "The glitch is divine.", "We are the ghost in the shell." ]
 };
 
+const FACTION_GRADIENTS: Record<string, string> = {
+    blue: '#0ea5e9',
+    red: '#ef4444',
+    emerald: '#10b981',
+    violet: '#8b5cf6',
+    orange: '#f97316',
+    lime: '#84cc16',
+    fuchsia: '#d946ef'
+};
+
 // --- Helper Functions ---
 
 const getModifierIcon = (mod: string) => {
@@ -155,7 +165,12 @@ const FactionHeader = ({ faction, directorId }: { faction: Faction, directorId: 
             animate-in fade-in slide-in-from-right-4 duration-300 shadow-xl
         `}>
             {/* Background elements */}
-            <div className={`absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-${faction.color}-900/20 to-transparent pointer-events-none`} />
+            <div
+                className="absolute top-0 right-0 w-64 h-full pointer-events-none"
+                style={{
+                    background: `linear-gradient(90deg, transparent, ${FACTION_GRADIENTS[faction.color] || '#22c55e'}33)`
+                }}
+            />
             <div className="absolute -bottom-4 -right-4 text-slate-800/20">
                 <Globe size={180} />
             </div>
@@ -235,16 +250,18 @@ const ContractCard = React.memo(({
     onStart,
     onTradeStart,
     isAccepting,
-    onHoverMod 
-}: { 
-    contract: Contract, 
-    canAfford: boolean, 
-    bonuses: GameBonuses, 
-    styles: any, 
+    onHoverMod,
+    currentCredits
+}: {
+    contract: Contract,
+    canAfford: boolean,
+    bonuses: GameBonuses,
+    styles: any,
     onStart: (c: Contract) => void,
     onTradeStart: (c: Contract) => void,
     isAccepting: boolean,
-    onHoverMod: (id: string, mod: string, rect: DOMRect) => void
+    onHoverMod: (id: string, mod: string, rect: DOMRect) => void,
+    currentCredits: number
 }) => {
     const isTrade = contract.kind === 'TRADE';
     
@@ -311,6 +328,8 @@ const ContractCard = React.memo(({
         return `${m}:${sec.toString().padStart(2, '0')}`;
     };
 
+    const missingCredits = Math.max(0, contract.deposit - currentCredits);
+
     return (
         <div className={`
             relative flex flex-col rounded-xl border overflow-hidden transition-all duration-200 group
@@ -333,17 +352,17 @@ const ContractCard = React.memo(({
                 </div>
                 
                 {/* Expire Timer */}
-                 <div className={`flex items-center gap-1 text-[10px] font-mono border px-1.5 py-0.5 rounded ${timeLeftMs < 30000 ? 'border-red-900 text-red-400 animate-pulse bg-red-950/30' : 'border-slate-800 text-slate-500 bg-slate-950'}`}>
-                     <Timer size={10} />
-                     {formatTime(timeLeftMs)}
-                 </div>
+                  <div className={`flex items-center gap-1 text-[10px] font-mono border px-1.5 py-0.5 rounded ${timeLeftMs < 30000 ? 'border-red-900 text-red-400 animate-pulse bg-red-950/30' : 'border-slate-800 text-slate-500 bg-slate-950'}`}>
+                      <Timer size={10} />
+                      {formatTime(timeLeftMs)}
+                  </div>
             </div>
 
             {/* Content Grid */}
             <div className="p-3 flex-1 flex flex-col justify-between gap-3">
                 {isTrade ? (
                     <div className="space-y-3">
-                         <div className="bg-emerald-900/10 border border-emerald-500/20 p-2 rounded">
+                          <div className="bg-emerald-900/10 border border-emerald-500/20 p-2 rounded">
                             <div className="text-[10px] text-emerald-500 uppercase font-bold mb-1">Required Asset</div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-white font-bold">{contract.tradeReqType}</span>
@@ -366,9 +385,9 @@ const ContractCard = React.memo(({
                 
                 {/* Modifiers */}
                 {!isTrade && contract.modifiers.length > 0 && (
-                     <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1">
                         {contract.modifiers.slice(0, 5).map(mod => (
-                             <div 
+                              <div 
                                 key={mod}
                                 onMouseEnter={(e) => onHoverMod(contract.id, mod, e.currentTarget.getBoundingClientRect())}
                                 onMouseLeave={() => onHoverMod(contract.id, '', new DOMRect())}
@@ -385,22 +404,22 @@ const ContractCard = React.memo(({
 
                 {/* Rewards */}
                 <div className="mt-auto pt-3 border-t border-slate-800/50 flex flex-col gap-1">
-                     <div className="flex justify-between items-center">
-                         <span className="text-[10px] text-slate-500 uppercase">Rewards</span>
-                         <div className="flex gap-3">
-                             {!isTrade && (
+                      <div className="flex justify-between items-center">
+                          <span className="text-[10px] text-slate-500 uppercase">Rewards</span>
+                          <div className="flex gap-3">
+                              {!isTrade && (
                                 <div className={`text-xs font-bold flex items-center gap-1 ${boostedData > contract.rewardData ? 'text-cyan-300' : 'text-cyan-500'}`}>
                                     <Database size={10} /> {boostedData}
                                 </div>
-                             )}
+                              )}
                             <div className={`text-xs font-bold flex items-center gap-1 ${boostedCredits > contract.rewardCredits ? 'text-yellow-300' : 'text-yellow-500'}`}>
                                 <DollarSign size={10} /> {boostedCredits}
                             </div>
-                         </div>
-                     </div>
-                     {!isTrade && baseGems > 0 && (
+                          </div>
+                      </div>
+                      {!isTrade && baseGems > 0 && (
                         <div className="flex justify-end">
-                             <div className={`text-xs font-bold flex items-center gap-1 ${boostedGems > baseGems ? 'text-purple-300' : 'text-purple-400'}`}>
+                              <div className={`text-xs font-bold flex items-center gap-1 ${boostedGems > baseGems ? 'text-purple-300' : 'text-purple-400'}`}>
                                 <Gem size={10} /> {boostedGems}
                             </div>
                         </div>
@@ -420,11 +439,11 @@ const ContractCard = React.memo(({
                 `}
             >
                 {isAccepting ? <Clock size={14} className="animate-spin" /> : 
-                 isTrade ? (
+                  isTrade ? (
                     <>
                         <Briefcase size={14} /> FULFILL ORDER
                     </>
-                 ) : canAfford ? (
+                  ) : canAfford ? (
                     <>
                         <span>INITIATE PROTOCOL</span>
                         <div className="bg-black/20 px-1.5 py-0.5 rounded text-[10px] font-mono flex items-center gap-0.5 ml-1 opacity-90">
@@ -432,12 +451,12 @@ const ContractCard = React.memo(({
                         </div>
                         <ChevronRight size={14} className="ml-1 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </>
-                 ) : (
+                    ) : (
                     <div className="flex items-center gap-1 text-red-500/70">
                         <LockKeyhole size={12} />
-                        <span>MISSING {contract.deposit - 0} CR</span>
+                        <span>MISSING {missingCredits} CR</span>
                     </div>
-                 )}
+                  )}
             </button>
         </div>
     );
@@ -646,6 +665,7 @@ export const ContractsScreen: React.FC<Props> = ({ state, onCompleteContract, on
                                 onTradeStart={handleTradeStart}
                                 isAccepting={isAccepting}
                                 onHoverMod={handleHoverMod}
+                                currentCredits={state.resources.credits}
                             />
                         ))}
                     </div>
