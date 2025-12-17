@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Contract, GameBonuses, MiniGameCellType, Resources } from '../../types';
-import { playSound } from '../../utils/audio';
+import { playSound, setMusicIntensity } from '../../utils/audio';
 import { 
     AlertTriangle, CheckCircle, XCircle, Zap, ShieldAlert, Crosshair, 
     ShieldOff, Flame, Pause, Clock, Layers, Star, FileWarning, Bomb, Bug,
-    EyeOff, Shield, Infinity, Gem
+    EyeOff, Shield, Infinity, Gem, X
 } from 'lucide-react';
 import { useFloatingText } from '../ui/FloatingTextOverlay';
 
@@ -14,6 +14,7 @@ interface MiniGameProps {
   contract: Contract;
   bonuses: GameBonuses;
   onComplete: (success: boolean, score: number) => void;
+  onAbandon?: () => void;
   updateResources?: (delta: Partial<Resources>) => void;
   currentResources?: Resources;
 }
@@ -53,7 +54,7 @@ const getModifierInfo = (mod: string) => {
     return { icon, title, desc, colorClass, textColor };
 };
 
-export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplete, updateResources, currentResources }) => {
+export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplete, onAbandon, updateResources }) => {
   const [currentGridSize, setCurrentGridSize] = useState(contract.isInfinite ? 3 : (contract.gridSize || 4));
   
   const stateRef = useRef({
@@ -91,6 +92,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   const isShielded = contract.modifiers.includes('shielded');
 
   useEffect(() => {
+      isMountedRef.current = true;
       const handleVisibilityChange = () => {
           if (document.hidden && stateRef.current.gameActive && !stateRef.current.result) {
               stateRef.current.paused = true;
@@ -105,14 +107,24 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
       };
   }, []);
 
-  const handleEnd = (win: boolean) => {
+  const handleEnd = useCallback((win: boolean) => {
     const s = stateRef.current;
-    if (!s.gameActive) return; 
+    if (!s.gameActive || s.result) return; 
+    
     s.gameActive = false;
     s.result = win ? 'WIN' : 'FAIL';
+    
+    // In infinite mode, losing stability counts as a "Success" extraction but ends the run
+    if (contract.isInfinite && !win) {
+         s.result = 'WIN';
+    }
+
     if (isMountedRef.current) setTick(t => t + 1);
-    playSound(win ? 'success' : 'fail');
-  };
+    playSound(win || contract.isInfinite ? 'success' : 'fail');
+    if (!win && !contract.isInfinite) {
+        setMusicIntensity('normal');
+    }
+  }, [contract.isInfinite]);
 
   const breakCombo = (rect?: DOMRect) => {
       const s = stateRef.current;
@@ -196,7 +208,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
          return;
     }
 
-    if (dt > 100) dt = 100;
+    if (dt > 100) dt = 100; // Cap dt to prevent massive jumps on lag
 
     s.timeAccumulator += dt;
 
@@ -219,25 +231,28 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         }
 
         if (s.timeLeft <= 0) {
-            handleEnd(contract.isInfinite ? true : false); // Timeout in infinite mode means success (survival)
+            handleEnd(true); // Timeout in infinite mode or standard mode is success
             return;
         }
         s.timeAccumulator -= 1000;
     }
 
-    const nextCells: Cell[] = [];
+    // Safely update cells without mutation during iteration
     const cellsToSpawn: Cell[] = [];
     let damage = 0;
     let scorePenalty = 0;
     let missedCell = false;
+    let nextCells = [];
 
+    // Filter step
     for (const c of s.cells) {
-        c.life -= dt; 
+        c.life -= dt;
         if (c.life > 0) {
             nextCells.push(c);
         } else {
+            // Expired logic
             if (c.type === 'trap') { /* Good, trap expired */ }
-            else if (c.type === 'gem_node') { missedCell = true; } // Missed gem, no penalty just sad
+            else if (c.type === 'gem_node') { missedCell = true; } 
             else if (c.type === 'red_tape') { scorePenalty += 3; playSound('fail'); missedCell = true; }
             else if (c.type === 'time_bomb') { damage += 30; playSound('fail'); missedCell = true; }
             else if (c.type === 'virus') { 
@@ -254,27 +269,27 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
             }
         }
     }
+    s.cells = nextCells;
     
     if (missedCell) s.combo = 0;
     if (damage > 0) s.stability = Math.max(0, s.stability - damage);
     if (scorePenalty > 0) s.score = Math.max(0, s.score - scorePenalty);
     
     cellsToSpawn.forEach(newCell => {
-        if (nextCells.length >= (currentGridSize * currentGridSize)) return;
+        if (s.cells.length >= (currentGridSize * currentGridSize)) return;
         let x = Math.floor(Math.random() * currentGridSize);
         let y = Math.floor(Math.random() * currentGridSize);
         let attempts = 0;
-        while(nextCells.some(c => c.x === x && c.y === y) && attempts < 20) {
+        while(s.cells.some(c => c.x === x && c.y === y) && attempts < 20) {
              x = Math.floor(Math.random() * currentGridSize);
              y = Math.floor(Math.random() * currentGridSize);
              attempts++;
         }
         if (attempts < 20) {
             newCell.x = x; newCell.y = y;
-            nextCells.push(newCell);
+            s.cells.push(newCell);
         }
     });
-    s.cells = nextCells;
 
     if (bonuses.stabilityRegen > 0 && !isFragile) {
        const regenAmount = (bonuses.stabilityRegen * dt) / 1000;
@@ -282,11 +297,10 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     }
 
     if (s.stability <= 0) {
-        handleEnd(false); // Stability loss is always a Fail
+        handleEnd(false); 
         return;
     }
     
-    // Win Condition (Standard)
     if (!contract.isInfinite && s.score >= contract.quota) {
         handleEnd(true);
         return;
@@ -296,10 +310,8 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     let spawnRate = 800;
 
     if (contract.isInfinite) {
-        // Accelerate over time
-        // 800ms start -> decreases based on elapsed time
         const elapsed = contract.durationSeconds - s.timeLeft;
-        spawnRate = Math.max(250, 800 - (elapsed * 3));
+        spawnRate = Math.max(200, 800 - (elapsed * 3)); 
     } else {
         spawnRate = contract.difficulty === 'Omega' ? 220 : 
                         contract.difficulty === 'Black Ops' ? 300 :
@@ -324,7 +336,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     }
     
     if (isMountedRef.current) frameRef.current = requestAnimationFrame(gameLoop);
-  }, [currentGridSize, contract, bonuses]); // Depend on contract and bonuses too, so loop isn't stale if props change
+  }, [currentGridSize, contract, bonuses, handleEnd]); 
 
   useEffect(() => {
     if (isMountedRef.current) frameRef.current = requestAnimationFrame(gameLoop);
@@ -376,8 +388,6 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
       let color = 'text-cyan-400';
       let textSize: 'sm' | 'md' | 'lg' = 'md';
       
-      // Infinite Mode Scoring: Score is basically Data yield
-      // Base points in infinite mode are slightly higher
       if (contract.isInfinite) basePoints = 3;
 
       if (cell.type === 'gem_node') {
@@ -450,7 +460,6 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   };
 
   const handleMiss = (e: React.PointerEvent | React.MouseEvent) => {
-      // Logic check: if the target is actually a cell, do nothing (event propagation should handle this, but safety first)
       if ((e.target as HTMLElement).getAttribute('data-cell') === 'true') return;
 
       const s = stateRef.current;
@@ -481,8 +490,9 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   const { stability, score, timeLeft, combo, maxCombo, paused, result, cells } = stateRef.current;
 
   return (
-    <div className={`flex flex-col items-center justify-center h-full w-full p-4 animate-in fade-in duration-300 ${contract.difficulty === 'Black Ops' ? 'bg-red-950/20' : ''}`}>
+    <div className={`relative w-full h-full flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 ${contract.difficulty === 'Black Ops' ? 'bg-red-950/20' : ''}`}>
       
+      {/* MiniGame Top Info Bar */}
       <div className="w-full max-w-md grid grid-cols-3 gap-2 items-end mb-4 font-mono text-sm relative select-none mt-8">
         <div className="flex flex-col">
             <span className="text-slate-400 text-xs">STABILITY</span>
@@ -520,6 +530,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         </div>
       </div>
 
+      {/* Grid Container */}
       <div 
         className={`relative rounded-lg overflow-hidden select-none cursor-crosshair w-full max-w-sm aspect-square transition-all duration-500
             ${contract.difficulty === 'Black Ops' ? 'border-4 border-red-900 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : 
@@ -544,6 +555,14 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                 <Pause size={48} className="text-cyan-400 mb-2" />
                 <span className="text-cyan-200 font-bold tracking-widest animate-pulse">SYSTEM PAUSED</span>
                 <span className="text-xs text-slate-500 mt-2">Tap to resume</span>
+                {onAbandon && (
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); onAbandon(); setMusicIntensity('normal'); }}
+                        className="mt-6 px-4 py-2 border border-red-500/50 text-red-400 hover:bg-red-900/20 rounded text-xs font-bold"
+                    >
+                        ABORT MISSION
+                    </button>
+                )}
             </div>
         )}
 
@@ -563,7 +582,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                     ${cell.type === 'red_tape' ? 'bg-blue-800 border-2 border-blue-400 opacity-90' : ''}
                     ${cell.type === 'time_bomb' ? 'bg-red-900 border-2 border-red-500 animate-bounce' : ''}
                     ${cell.type === 'virus' ? 'bg-emerald-700 border-2 border-emerald-400' : ''}
-                    ${cell.type === 'shielded_core' ? 'bg-blue-950 border-4 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]' : ''}
+                    ${cell.type === 'shielded_core' ? 'bg-blue-950 border-4 border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]' : ''}
                     ${cell.type === 'gem_node' ? 'bg-fuchsia-900 border-2 border-fuchsia-400 shadow-[0_0_15px_currentColor] text-fuchsia-100' : ''}
                 `}
                 style={{
@@ -642,8 +661,8 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                   {result === 'WIN' ? (
                       <>
                         <CheckCircle size={48} className="mx-auto text-green-400 mb-4" />
-                        <h2 className="text-2xl font-bold text-white mb-2">{contract.isInfinite ? 'SIMULATION COMPLETE' : 'CONTRACT FULFILLED'}</h2>
-                        <p className="text-slate-400 mb-2">{contract.isInfinite ? 'Time limit reached. Extracting.' : 'Quota met. Data secured.'}</p>
+                        <h2 className="text-2xl font-bold text-white mb-2">{contract.isInfinite ? 'DATA EXTRACTED' : 'CONTRACT FULFILLED'}</h2>
+                        <p className="text-slate-400 mb-2">{contract.isInfinite ? 'Extraction complete. Data secured.' : 'Quota met. Data secured.'}</p>
                         {contract.isInfinite && (
                              <div className="mb-4 text-emerald-400 font-bold font-mono text-lg">
                                  YIELD: {score} DATA

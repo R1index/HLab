@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 interface FloatingItem {
@@ -42,8 +43,8 @@ export const FloatingTextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   return (
     <FloatingTextContext.Provider value={{ spawnText }}>
       {children}
-      {/* Overlay Container - z-50 to be above normal UI but below Modals (z-100) */}
-      <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {/* Overlay Container - z-[200] to be above Modals (usually z-[100]) */}
+      <div className="fixed inset-0 pointer-events-none z-[200] overflow-hidden">
         {items.map(item => (
           <div
             key={item.id}

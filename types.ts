@@ -1,10 +1,17 @@
 
+
 export type ResourceType = 'credits' | 'data' | 'gems';
 
 export interface Resources {
   credits: number;
   data: number;
   gems: number;
+}
+
+export interface GameEvent {
+    type: 'RESOURCE_GAIN';
+    resource: ResourceType;
+    amount: number;
 }
 
 export type StaffRarity = 'R' | 'SR' | 'SSR' | 'UR';
@@ -180,5 +187,8 @@ export interface GameState {
   volume: number; // New: 0.0 to 1.0
   factions: Record<string, Faction>;
   availableContracts: Contract[]; 
+  activeProtocol: Contract | null; // GLOBAL ACTIVE MISSION
   lastSaveTime: number; 
+  lastHackTime: number; // New: To prevent clicker exploit
+  lastEmergencyFundTime: number; // New: Prevent funding exploit
 }

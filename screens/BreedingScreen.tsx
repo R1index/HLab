@@ -5,16 +5,18 @@ import { STAFF_DB, CREATURE_DB, getAnimeAvatarUrl, getCurrentFertility, getCycle
 import { Heart, Dna, Activity, Lock, FlaskConical, Skull, AlertTriangle, Link, Zap, Droplets, Biohazard } from 'lucide-react';
 import { Avatar } from '../components/ui/Avatar';
 import { playSound } from '../utils/audio';
+import { useFloatingText } from '../components/ui/FloatingTextOverlay';
 
 interface Props {
   state: GameState;
-  onBreed: (staffId: string, creatureId: string) => void;
+  onBreed: (staffId: string, creatureId: string, success: boolean, isInjured: boolean, isInfected: boolean) => void;
 }
 
 export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [selectedCreatureId, setSelectedCreatureId] = useState<string | null>(null);
   const [isBreeding, setIsBreeding] = useState(false);
+  const { spawnText } = useFloatingText();
 
   const ownedStaff = STAFF_DB.filter(s => state.ownedStaffIds.includes(s.id));
   
@@ -24,8 +26,8 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
   
   const eligibleStaff = ownedStaff.filter(s => {
       const progress = state.staffProgress[s.id];
-      // Can't breed if pregnant or incapacitated (0 HP)
-      return progress && !progress.isPregnant && (progress.health || 100) > 0;
+      // Can't breed if pregnant or incapacitated (0 HP) - Use ?? to handle 0 correctly
+      return progress && !progress.isPregnant && (progress.health ?? 100) > 0;
   });
 
   const selectedStaff = ownedStaff.find(s => s.id === selectedStaffId);
@@ -38,6 +40,7 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
   const arousalCost = 30;
   const fatigueCost = 15;
   const currentStaffArousal = staffProgress?.arousal || 0;
+  const currentHealth = staffProgress ? (staffProgress.health ?? 100) : 100;
   
   // Cycle Calculations
   const cyclePhase = staffProgress ? getCyclePhase(staffProgress.cycleProgress || 0) : 'Follicular';
@@ -45,35 +48,40 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
   const isMenstruating = cyclePhase === 'Menstruation';
   const creatureFertility = selectedCreature?.fertility || 'Medium';
 
-  // Breeding fails if Staff Arousal is 0 OR Menstruating OR Fertility is None
-  // Also check creature fatigue? For now just display it as penalty
-  const canBreed = selectedStaff && selectedCreature && !isBreeding && currentStaffArousal > 0 && !isMenstruating && effectiveFertility !== 'None';
+  // Breeding fails if Staff Arousal is 0 OR Menstruating OR Fertility is None OR Health is 0
+  const canBreed = selectedStaff && 
+                   selectedCreature && 
+                   !isBreeding && 
+                   currentStaffArousal > 0 && 
+                   !isMenstruating && 
+                   effectiveFertility !== 'None' && 
+                   currentHealth > 0;
 
   // Probability Calculation Logic
   const stats = useMemo(() => {
       if (!selectedStaff || !selectedCreature || !staffProgress || !creatureStatus) return null;
 
-      const baseChance = 10;
+      const baseChance = 2; // Reduced base chance
       
       const currentStaffArousal = staffProgress.arousal || 0;
       const currentStaffFatigue = staffProgress.fatigue || 0;
-      const currentHealth = staffProgress.health || 100;
+      const currentHealthCalc = staffProgress.health ?? 100;
 
       const currentCreatureArousal = creatureStatus.arousal;
       const currentCreatureFatigue = creatureStatus.fatigue;
 
-      // Arousal Bonus: (Staff*0.6 + Creature*0.4) * 0.5. Max +50%.
-      const arousalFactor = ((currentStaffArousal * 0.6) + (currentCreatureArousal * 0.4)) * 0.5;
+      // Arousal Bonus: (Staff*0.6 + Creature*0.4) * 0.05. Max +5%.
+      const arousalFactor = ((currentStaffArousal * 0.6) + (currentCreatureArousal * 0.4)) * 0.05;
       
-      // Fatigue Penalty: Combined
-      const fatiguePenalty = (currentStaffFatigue + currentCreatureFatigue) * 0.3;
+      // Fatigue Penalty: Combined * 0.05. Max -10%.
+      const fatiguePenalty = (currentStaffFatigue + currentCreatureFatigue) * 0.05;
 
-      // Health Penalty: (100 - HP) * 0.5. e.g. 0 HP = -50%
-      const healthPenalty = (100 - currentHealth) * 0.5;
+      // Health Penalty: (100 - HP) * 0.05. Max -5%.
+      const healthPenalty = (100 - currentHealthCalc) * 0.05;
 
-      // Fetish Bonus
+      // Fetish Bonus: +4%
       const isFetishMatch = selectedStaff.fetish === selectedCreature.subtype;
-      const fetishBonus = isFetishMatch ? 25 : 0;
+      const fetishBonus = isFetishMatch ? 4 : 0;
 
       // Creepiness Logic
       let creepinessMod = 0;
@@ -83,10 +91,10 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
 
       if (isCreepy) {
           if (staffCorruption < 30) {
-              creepinessMod = -50;
+              creepinessMod = -2; // Fear penalty
               creepinessStatus = 'FEAR';
           } else if (staffCorruption > 60) {
-              creepinessMod = 25;
+              creepinessMod = 2; // Corruption bonus
               creepinessStatus = 'KINK';
           }
       }
@@ -102,7 +110,7 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
       // Apply multiplier
       chance *= combinedMult;
 
-      const totalChance = Math.min(100, chance);
+      const totalChance = Math.min(15, chance); // Hard cap at 15%
 
       // Risks Calculation (Visual Only)
       const damageRisk = Math.min(100, (selectedCreature.wildness || 0) / 2 + (currentStaffFatigue / 4));
@@ -132,17 +140,43 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
   }, [selectedStaff, selectedCreature, staffProgress, creatureStatus, effectiveFertility, creatureFertility]);
 
   const executeBreeding = () => {
-      if (!canBreed) return;
+      if (!canBreed || !stats) return;
       setIsBreeding(true);
       playSound('spawn');
       
+      // Roll Logic
+      const roll = Math.random() * 100;
+      const success = roll < stats.totalChance;
+
+      // New Risk Rolls
+      const injuryRoll = Math.random() * 100;
+      const isInjured = injuryRoll < stats.damageRisk;
+
+      const diseaseRoll = Math.random() * 100;
+      const isInfected = diseaseRoll < stats.diseaseRisk;
+
       // Animation Delay
       setTimeout(() => {
-          onBreed(selectedStaffId!, selectedCreatureId!);
+          onBreed(selectedStaffId!, selectedCreatureId!, success, isInjured, isInfected);
+          
+          if (success) {
+            playSound('success');
+            spawnText(window.innerWidth/2, window.innerHeight/2, "SUCCESSFUL INSEMINATION", "text-green-400", "lg");
+          } else {
+            playSound('fail');
+            spawnText(window.innerWidth/2, window.innerHeight/2, "BREEDING FAILED", "text-red-500", "lg");
+          }
+
+          if (isInjured) {
+              setTimeout(() => spawnText(window.innerWidth/2, window.innerHeight/2 + 40, "CRITICAL INJURY", "text-red-600", "lg"), 200);
+          }
+          if (isInfected) {
+              setTimeout(() => spawnText(window.innerWidth/2, window.innerHeight/2 + 80, "INFECTED", "text-purple-500", "lg"), 400);
+          }
+          
           setSelectedStaffId(null);
           setSelectedCreatureId(null);
           setIsBreeding(false);
-          playSound('success');
       }, 2000);
   };
 
@@ -192,6 +226,11 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
                                 {cyclePhase}
                             </div>
                         )}
+                        {currentHealth <= 0 && selectedStaff && (
+                            <div className="text-[9px] font-bold bg-red-900 text-red-200 px-2 py-0.5 rounded border border-red-500 mt-1 animate-pulse">
+                                INCAPACITATED
+                            </div>
+                        )}
                     </div>
 
                     {/* Middle: Stats or Vs */}
@@ -200,11 +239,12 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
                             <div className="w-full space-y-2">
                                 <div className="flex flex-col items-center">
                                     <span className="text-xs text-slate-400 font-mono uppercase">Success Probability</span>
-                                    <div className={`text-3xl font-bold font-mono ${stats.totalChance > 70 ? 'text-green-400' : stats.totalChance > 30 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {Math.floor(stats.totalChance)}%
+                                    <div className={`text-3xl font-bold font-mono ${stats.totalChance > 10 ? 'text-green-400' : stats.totalChance > 5 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                        {stats.totalChance.toFixed(1)}%
                                     </div>
                                     {isMenstruating && <span className="text-[10px] text-red-500 font-bold uppercase animate-pulse">CYCLE MISMATCH</span>}
                                     {!isMenstruating && effectiveFertility === 'None' && <span className="text-[10px] text-red-500 font-bold uppercase">INFERTILE</span>}
+                                    {currentHealth <= 0 && <span className="text-[10px] text-red-500 font-bold uppercase animate-pulse">CRITICAL HEALTH</span>}
                                 </div>
                                 <div className="space-y-1 text-[9px] font-mono text-slate-400">
                                     <div className="flex justify-between border-b border-slate-800 pb-1 mb-1">
@@ -229,12 +269,12 @@ export const BreedingScreen: React.FC<Props> = ({ state, onBreed }) => {
                                     </div>
                                     <div className="flex justify-between text-orange-400">
                                         <span>Fatigue Penalty</span>
-                                        <span>-{Math.floor(stats.fatiguePenalty)}%</span>
+                                        <span>-{stats.fatiguePenalty.toFixed(1)}%</span>
                                     </div>
                                     {stats.healthPenalty > 0 && (
                                         <div className="flex justify-between text-red-500 font-bold">
                                             <span>Low Health Penalty</span>
-                                            <span>-{Math.floor(stats.healthPenalty)}%</span>
+                                            <span>-{stats.healthPenalty.toFixed(1)}%</span>
                                         </div>
                                     )}
                                 </div>

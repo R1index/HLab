@@ -1,59 +1,227 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameState, Staff, Creature } from '../types';
 import { GACHA_COST, CREATURE_GACHA_COST, getAnimeAvatarUrl } from '../constants';
 import { playSound } from '../utils/audio';
-import { Sparkles, Hexagon, Star, Gift, Repeat, Scan, Radio, Dna, ArrowRight, FlaskConical } from 'lucide-react';
+import { Sparkles, Hexagon, Star, Gift, Repeat, Scan, Radio, Dna, ArrowRight, FlaskConical, Zap, Grid3X3 } from 'lucide-react';
 import { Avatar } from '../components/ui/Avatar';
 
 interface Props {
   state: GameState;
   onPerformGacha: () => { staff: Staff, isDuplicate: boolean, reward: number } | null;
   onPerformCreatureGacha: () => { creature: Creature, isDuplicate: boolean, reward: number } | null;
+  onPerformBatchGacha: (type: 'STAFF' | 'CREATURE', count: number) => { staff?: Staff, creature?: Creature, isDuplicate: boolean, reward: number }[] | null;
 }
 
 type Tab = 'STAFF' | 'CREATURE';
 
-export const GachaScreen: React.FC<Props> = ({ state, onPerformGacha, onPerformCreatureGacha }) => {
+export const GachaScreen: React.FC<Props> = ({ state, onPerformGacha, onPerformCreatureGacha, onPerformBatchGacha }) => {
   const [activeTab, setActiveTab] = useState<Tab>('STAFF');
   const [animating, setAnimating] = useState(false);
-  const [lastPull, setLastPull] = useState<{ staff?: Staff, creature?: Creature, isDuplicate: boolean, reward: number } | null>(null);
+  const [lastPull, setLastPull] = useState<{ staff?: Staff, creature?: Creature, isDuplicate: boolean, reward: number }[] | null>(null);
 
-  const pullGacha = () => {
-    if (activeTab === 'STAFF') {
-        if (!state.freeRecruitAvailable && state.resources.gems < GACHA_COST) return;
-        const result = onPerformGacha();
-        if (!result) { playSound('fail'); return; }
-        
-        startAnimation(() => setLastPull({ ...result }));
+  // Clear result when switching tabs
+  useEffect(() => {
+      setLastPull(null);
+      setAnimating(false);
+  }, [activeTab]);
+
+  const pullGacha = (count: number) => {
+    let results = null;
+
+    if (count === 1) {
+        if (activeTab === 'STAFF') {
+            if (!state.freeRecruitAvailable && state.resources.gems < GACHA_COST) return;
+            const res = onPerformGacha();
+            if (res) results = [res];
+        } else {
+            if (state.resources.gems < CREATURE_GACHA_COST) return;
+            const res = onPerformCreatureGacha();
+            if (res) results = [res];
+        }
     } else {
-        if (state.resources.gems < CREATURE_GACHA_COST) return;
-        const result = onPerformCreatureGacha();
-        if (!result) { playSound('fail'); return; }
-
-        startAnimation(() => setLastPull({ ...result }));
+        results = onPerformBatchGacha(activeTab, count);
     }
-  };
 
-  const startAnimation = (callback: () => void) => {
+    if (!results) { playSound('fail'); return; }
+
+    // 2. Set State to drive animation
+    setLastPull(results);
     setAnimating(true);
-    setLastPull(null);
     playSound('spawn');
+
+    // Find highest rarity in batch for color logic
+    let maxRarity = 'R';
+    results.forEach(r => {
+        const rarity = r.staff?.rarity || r.creature?.rarity || 'R';
+        if (rarity === 'UR') maxRarity = 'UR';
+        else if (rarity === 'SSR' && maxRarity !== 'UR') maxRarity = 'SSR';
+        else if (rarity === 'SR' && maxRarity !== 'UR' && maxRarity !== 'SSR') maxRarity = 'SR';
+    });
+
+    const isHighRarity = maxRarity === 'SSR' || maxRarity === 'UR';
+    const duration = isHighRarity ? 2500 : 1500;
+
+    // 3. Reveal at end of duration
     setTimeout(() => {
-        callback();
-        playSound('success');
         setAnimating(false);
-    }, 2000);
+        playSound('success');
+    }, duration);
   };
 
-  const renderStars = (rarity: string) => {
+  const renderStars = (rarity: string, size = 12) => {
       const count = rarity === 'UR' ? 5 : rarity === 'SSR' ? 3 : rarity === 'SR' ? 2 : 1;
       return (
           <div className="flex gap-0.5 justify-center">
               {Array.from({ length: count }).map((_, i) => (
-                  <Star key={i} size={12} className={`fill-current ${rarity === 'UR' ? 'text-red-500' : 'text-yellow-400'}`} />
+                  <Star key={i} size={size} className={`fill-current ${rarity === 'UR' ? 'text-red-500' : 'text-yellow-400'}`} />
               ))}
           </div>
+      );
+  };
+
+  const getAnimColors = (rarity: string) => {
+      switch(rarity) {
+          case 'UR': return { 
+              border: 'border-red-500', 
+              shadow: 'shadow-red-500', 
+              text: 'text-red-500', 
+              bg: 'bg-red-500',
+              spinSpeed: 'duration-300' 
+          };
+          case 'SSR': return { 
+              border: 'border-yellow-400', 
+              shadow: 'shadow-yellow-400', 
+              text: 'text-yellow-400', 
+              bg: 'bg-yellow-400',
+              spinSpeed: 'duration-700'
+          };
+          case 'SR': return { 
+              border: 'border-purple-400', 
+              shadow: 'shadow-purple-400', 
+              text: 'text-purple-400', 
+              bg: 'bg-purple-400',
+              spinSpeed: 'duration-1000'
+          };
+          default: return { 
+              border: 'border-cyan-400', 
+              shadow: 'shadow-cyan-400', 
+              text: 'text-cyan-400', 
+              bg: 'bg-cyan-400',
+              spinSpeed: 'duration-[2000ms]'
+          };
+      }
+  };
+
+  // Determine current display logic
+  let currentRarity = 'R';
+  if (lastPull) {
+      lastPull.forEach(r => {
+          const rarity = r.staff?.rarity || r.creature?.rarity || 'R';
+          if (rarity === 'UR') currentRarity = 'UR';
+          else if (rarity === 'SSR' && currentRarity !== 'UR') currentRarity = 'SSR';
+          else if (rarity === 'SR' && currentRarity !== 'UR' && currentRarity !== 'SSR') currentRarity = 'SR';
+      });
+  }
+
+  const animStyle = getAnimColors(animating ? currentRarity : 'R');
+  const isShake = animating && (currentRarity === 'UR' || currentRarity === 'SSR');
+  const isIntenseShake = animating && currentRarity === 'UR';
+
+  const singleCost = activeTab === 'STAFF' ? GACHA_COST : CREATURE_GACHA_COST;
+  const batchCost = singleCost * 10;
+  const canAffordBatch = state.resources.gems >= batchCost;
+  const canAffordSingle = activeTab === 'STAFF' ? (state.freeRecruitAvailable || state.resources.gems >= GACHA_COST) : (state.resources.gems >= CREATURE_GACHA_COST);
+
+  const ResultItemView = ({ item, isGrid = false }: { item: any, isGrid?: boolean }) => {
+      const isStaff = !!item.staff;
+      const data = item.staff || item.creature;
+      const isDuplicate = item.isDuplicate;
+      const rarity = data.rarity;
+      const colors = getAnimColors(rarity);
+
+      if (isGrid) {
+          return (
+              <div className={`relative bg-slate-950 border rounded-lg overflow-hidden flex flex-col items-center p-2 ${colors.border} ${rarity === 'UR' || rarity === 'SSR' ? 'shadow-lg '+colors.shadow.replace('shadow-', 'shadow-'+colors.border.split('-')[1]+'/20') : ''}`}>
+                  <div className="w-12 h-12 rounded bg-slate-900 mb-2 relative overflow-hidden shrink-0">
+                      {isStaff ? (
+                          <Avatar src={getAnimeAvatarUrl(data.imageSeed)} alt={data.name} className={`w-full h-full object-cover ${isDuplicate ? 'grayscale opacity-50' : ''}`} />
+                      ) : (
+                          <div className="w-full h-full flex items-center justify-center text-purple-400"><FlaskConical size={20} /></div>
+                      )}
+                      {isDuplicate && <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-[8px] text-white font-bold">DUP</div>}
+                  </div>
+                  <div className={`text-[9px] font-bold truncate w-full text-center ${colors.text}`}>{data.name || data.variant}</div>
+                  <div className="mt-1">{renderStars(rarity, 8)}</div>
+                  {isDuplicate && <div className="text-[8px] text-cyan-400 mt-1 font-mono">+{item.reward} DATA</div>}
+              </div>
+          );
+      }
+
+      // Single big card view
+      return (
+        <div className={`
+            w-64 bg-slate-900 border-2 rounded-xl overflow-hidden shadow-2xl relative group animate-in zoom-in duration-300
+            ${rarity === 'UR' ? 'border-red-500 shadow-red-500/50' :
+                rarity === 'SSR' ? 'border-yellow-400 shadow-yellow-500/30' : 
+                rarity === 'SR' ? 'border-purple-500 shadow-purple-500/30' :
+                'border-slate-600'}
+        `}>
+            <div className="bg-slate-950 p-6 flex justify-center border-b border-slate-800 relative">
+                {isStaff ? (
+                    <Avatar 
+                        src={getAnimeAvatarUrl(data.imageSeed)} 
+                        className={`w-32 h-32 object-cover drop-shadow-lg ${isDuplicate ? 'grayscale opacity-80' : ''}`}
+                        alt="Character"
+                    />
+                ) : (
+                    <div className="w-32 h-32 flex items-center justify-center bg-slate-900 rounded-full border border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                        <FlaskConical size={64} className="text-purple-400" />
+                    </div>
+                )}
+
+                {isDuplicate && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                        <div className="bg-slate-900 border border-slate-500 px-3 py-1 rounded text-[10px] font-bold text-white flex items-center shadow-lg transform -rotate-12 border-dashed">
+                            <Repeat size={12} className="mr-1" />
+                            DUPLICATE FOUND
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            <div className="p-4 text-center relative z-10 bg-slate-900">
+                {isStaff ? (
+                    <>
+                        <div className="text-lg font-bold mb-0.5 text-white">{data.name}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 font-mono">{data.role}</div>
+                        {renderStars(rarity)}
+                    </>
+                ) : (
+                    <>
+                        <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-widest">
+                            <span>{data.type}</span>
+                            <ArrowRight size={10} />
+                            <span>{data.subtype}</span>
+                        </div>
+                        <div className="text-xl font-bold mb-1 text-purple-200">{data.variant}</div>
+                        {renderStars(rarity)}
+                    </>
+                )}
+                
+                <div className="mt-4 pt-4 border-t border-slate-800">
+                    {isDuplicate ? (
+                        <div className="text-[10px] bg-cyan-950/30 p-2 rounded text-cyan-300 border border-cyan-800/50 font-mono">
+                            CONVERTED: +{item.reward} DATA
+                        </div>
+                    ) : (
+                        <div className="text-[10px] bg-slate-950 p-2 rounded text-slate-400 border border-slate-800 leading-tight italic">
+                            "{data.description}"
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
       );
   };
 
@@ -66,110 +234,68 @@ export const GachaScreen: React.FC<Props> = ({ state, onPerformGacha, onPerformC
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-slate-900/80 rounded-lg border border-slate-700 mb-6 relative z-20">
+      <div className="flex gap-2 p-1 bg-slate-900/80 rounded-lg border border-slate-700 mb-4 relative z-20 shrink-0">
           <button 
-             onClick={() => { setActiveTab('STAFF'); setLastPull(null); }}
+             onClick={() => { setActiveTab('STAFF'); }}
              className={`px-4 py-2 rounded text-xs font-bold transition-all ${activeTab === 'STAFF' ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
           >
-              PERSONNEL RECRUITMENT
+              PERSONNEL
           </button>
           <button 
-             onClick={() => { setActiveTab('CREATURE'); setLastPull(null); }}
+             onClick={() => { setActiveTab('CREATURE'); }}
              className={`px-4 py-2 rounded text-xs font-bold transition-all ${activeTab === 'CREATURE' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
           >
-              SPECIMEN INCUBATION
+              SPECIMENS
           </button>
       </div>
 
-      <div className="text-center mb-6 relative z-10">
-          <div className="inline-flex items-center justify-center p-2 bg-slate-900/80 border border-slate-700 rounded-lg mb-2 backdrop-blur-sm">
-             {activeTab === 'STAFF' ? <Radio className="mr-2 text-cyan-400 animate-pulse" size={16} /> : <Dna className="mr-2 text-purple-400 animate-spin-slow" size={16} />}
-             <span className="text-xs font-bold text-white tracking-widest uppercase">
-                 {activeTab === 'STAFF' ? 'Neural Uplink' : 'Genetic Sequencer'}
-             </span>
-          </div>
-          <p className="text-slate-500 text-[10px] font-mono">
-              {activeTab === 'STAFF' ? 'ESTABLISHING SECURE CONNECTION TO GLOBAL DATABASE' : 'SYNTHESIZING BIOLOGICAL ASSETS FROM RAW DATA'}
-          </p>
-      </div>
+      {!lastPull && (
+        <div className="text-center mb-6 relative z-10 shrink-0">
+            <div className="inline-flex items-center justify-center p-2 bg-slate-900/80 border border-slate-700 rounded-lg mb-2 backdrop-blur-sm">
+                {activeTab === 'STAFF' ? <Radio className="mr-2 text-cyan-400 animate-pulse" size={16} /> : <Dna className="mr-2 text-purple-400 animate-spin-slow" size={16} />}
+                <span className="text-xs font-bold text-white tracking-widest uppercase">
+                    {activeTab === 'STAFF' ? 'Neural Uplink' : 'Genetic Sequencer'}
+                </span>
+            </div>
+            <p className="text-slate-500 text-[10px] font-mono">
+                {activeTab === 'STAFF' ? 'ESTABLISHING SECURE CONNECTION...' : 'SYNTHESIZING ASSETS FROM RAW DATA...'}
+            </p>
+        </div>
+      )}
 
-      <div className="relative w-full max-w-sm h-64 mb-8 flex items-center justify-center z-10">
+      <div className="relative w-full flex-1 flex flex-col items-center justify-center z-10 min-h-0 overflow-hidden mb-4">
           {animating ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                  <div className={`absolute inset-0 border-2 rounded-full animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] ${activeTab === 'STAFF' ? 'border-cyan-500/20' : 'border-purple-500/20'}`}></div>
-                  <div className={`absolute inset-4 border-2 rounded-full animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite_0.5s] ${activeTab === 'STAFF' ? 'border-cyan-400/30' : 'border-purple-400/30'}`}></div>
-                  <div className={`absolute inset-0 border-t-2 rounded-full animate-spin ${activeTab === 'STAFF' ? 'border-cyan-500' : 'border-purple-500'}`}></div>
-                  <div className="text-white font-mono text-xs animate-pulse tracking-widest bg-slate-950 px-2 z-10">
-                      {activeTab === 'STAFF' ? 'SCANNING...' : 'INCUBATING...'}
+              <div className={`relative w-64 h-64 flex items-center justify-center ${isIntenseShake ? 'animate-[shake_0.1s_ease-in-out_infinite]' : isShake ? 'animate-[shake_0.5s_ease-in-out_infinite]' : ''}`}>
+                  {/* Core Energy */}
+                  <div className={`absolute inset-0 border-4 rounded-full animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-50 ${animStyle.border}`}></div>
+                  
+                  {/* Spinning Rings */}
+                  <div className={`absolute w-48 h-48 border-2 rounded-full border-t-transparent animate-spin ${animStyle.border} ${animStyle.spinSpeed}`}></div>
+                  <div className={`absolute w-32 h-32 border-4 rounded-full border-b-transparent animate-spin ${animStyle.border} duration-[1500ms] opacity-70`}></div>
+                  
+                  {/* Inner Core */}
+                  <div className={`w-16 h-16 rounded-full ${animStyle.bg} animate-pulse shadow-[0_0_30px_currentColor] flex items-center justify-center`}>
+                       <Zap size={24} className="text-white animate-bounce" />
+                  </div>
+
+                  {/* Text */}
+                  <div className="absolute -bottom-8 text-white font-mono text-xs animate-pulse tracking-widest bg-slate-950/80 px-2 z-10 border border-slate-800 rounded">
+                      {activeTab === 'STAFF' ? 'MATERIALIZING...' : 'INCUBATING...'}
                   </div>
               </div>
           ) : lastPull ? (
-              <div className="animate-in zoom-in duration-500 flex flex-col items-center w-full">
-                   {/* RESULT CARD */}
-                   <div className={`
-                       w-64 bg-slate-900 border-2 rounded-xl overflow-hidden shadow-2xl relative group
-                       ${(lastPull.staff?.rarity === 'UR' || lastPull.creature?.rarity === 'UR') ? 'border-red-500 shadow-red-500/50' :
-                         (lastPull.staff?.rarity === 'SSR' || lastPull.creature?.rarity === 'SSR') ? 'border-yellow-400 shadow-yellow-500/30' : 
-                         'border-slate-600'}
-                   `}>
-                       {/* Materialize Effect */}
-                       <div className="absolute inset-0 bg-white/20 animate-[ping_0.5s_ease-out_1] pointer-events-none"></div>
-                       
-                       <div className="bg-slate-950 p-6 flex justify-center border-b border-slate-800 relative">
-                           {lastPull.staff ? (
-                               <Avatar 
-                                    src={getAnimeAvatarUrl(lastPull.staff.imageSeed)} 
-                                    className={`w-32 h-32 object-cover drop-shadow-lg ${lastPull.isDuplicate ? 'grayscale opacity-80' : ''}`}
-                                    alt="Character"
-                               />
-                           ) : (
-                               <div className="w-32 h-32 flex items-center justify-center bg-slate-900 rounded-full border border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-                                   <FlaskConical size={64} className="text-purple-400" />
-                               </div>
-                           )}
-
-                           {lastPull.isDuplicate && (
-                               <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-                                   <div className="bg-slate-900 border border-slate-500 px-3 py-1 rounded text-[10px] font-bold text-white flex items-center shadow-lg transform -rotate-12 border-dashed">
-                                       <Repeat size={12} className="mr-1" />
-                                       DUPLICATE FOUND
-                                   </div>
-                               </div>
-                           )}
+              <div className="w-full h-full overflow-y-auto px-4 py-2 flex flex-col items-center">
+                   {lastPull.length === 1 ? (
+                       <div className="my-auto">
+                           <ResultItemView item={lastPull[0]} />
                        </div>
-                       
-                       <div className="p-4 text-center relative z-10 bg-slate-900">
-                           {lastPull.staff ? (
-                               <>
-                                   <div className="text-lg font-bold mb-0.5 text-white">{lastPull.staff.name}</div>
-                                   <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 font-mono">{lastPull.staff.role}</div>
-                                   {renderStars(lastPull.staff.rarity)}
-                               </>
-                           ) : lastPull.creature ? (
-                               <>
-                                   <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-widest">
-                                       <span>{lastPull.creature.type}</span>
-                                       <ArrowRight size={10} />
-                                       <span>{lastPull.creature.subtype}</span>
-                                   </div>
-                                   <div className="text-xl font-bold mb-1 text-purple-200">{lastPull.creature.variant}</div>
-                                   {renderStars(lastPull.creature.rarity)}
-                               </>
-                           ) : null}
-                           
-                           <div className="mt-4 pt-4 border-t border-slate-800">
-                               {lastPull.isDuplicate ? (
-                                   <div className="text-[10px] bg-cyan-950/30 p-2 rounded text-cyan-300 border border-cyan-800/50 font-mono">
-                                       CONVERTED: +{lastPull.reward} DATA
-                                   </div>
-                               ) : (
-                                   <div className="text-[10px] bg-slate-950 p-2 rounded text-slate-400 border border-slate-800 leading-tight italic">
-                                       "{lastPull.staff?.description || lastPull.creature?.description}"
-                                   </div>
-                               )}
-                           </div>
+                   ) : (
+                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-2xl my-auto animate-in zoom-in duration-500">
+                           {lastPull.map((item, idx) => (
+                               <ResultItemView key={idx} item={item} isGrid={true} />
+                           ))}
                        </div>
-                   </div>
+                   )}
               </div>
           ) : (
               <div className="relative group cursor-default">
@@ -184,34 +310,51 @@ export const GachaScreen: React.FC<Props> = ({ state, onPerformGacha, onPerformC
           )}
       </div>
 
-      {/* Action Button */}
-      <button
-        onClick={pullGacha}
-        disabled={animating || (activeTab === 'STAFF' && !state.freeRecruitAvailable && state.resources.gems < GACHA_COST) || (activeTab === 'CREATURE' && state.resources.gems < CREATURE_GACHA_COST)}
-        className={`
-            relative overflow-hidden px-8 py-3 rounded md:w-64 w-full max-w-xs font-bold text-sm tracking-wider flex items-center justify-center transition-all group
-            ${(!animating && ((activeTab === 'STAFF' && (state.freeRecruitAvailable || state.resources.gems >= GACHA_COST)) || (activeTab === 'CREATURE' && state.resources.gems >= CREATURE_GACHA_COST)))
-            ? (activeTab === 'STAFF' ? 'bg-cyan-700 hover:bg-cyan-600 border-cyan-500' : 'bg-purple-700 hover:bg-purple-600 border-purple-500') + ' text-white shadow-lg border'
-            : 'bg-slate-900 text-slate-600 cursor-not-allowed border border-slate-800'}
-        `}
-      >
-          {animating ? 'PROCESSING...' : (activeTab === 'STAFF' && state.freeRecruitAvailable) ? (
-              <>
-                <Gift className="mr-2 animate-bounce text-yellow-400" size={16} />
-                <span className="text-yellow-100">FREE RECRUIT</span>
-              </>
-          ) : (
-              <div className="flex flex-col items-center leading-none py-1">
-                <span>{activeTab === 'STAFF' ? 'INITIATE SEARCH' : 'BEGIN INCUBATION'}</span>
-                <span className={`text-[10px] mt-1 font-mono opacity-80 ${activeTab === 'STAFF' ? 'text-cyan-200' : 'text-purple-200'}`}>
-                    COST: {activeTab === 'STAFF' ? GACHA_COST : CREATURE_GACHA_COST} GEMS
-                </span>
+      {/* Action Buttons Row */}
+      <div className="w-full max-w-md px-4 flex gap-3 shrink-0 mb-2">
+          {/* Single Pull Button */}
+          <button
+            onClick={() => pullGacha(1)}
+            disabled={animating || !canAffordSingle}
+            className={`
+                flex-1 relative overflow-hidden py-3 rounded font-bold text-xs tracking-wider flex flex-col items-center justify-center transition-all group border
+                ${(!animating && canAffordSingle)
+                ? (activeTab === 'STAFF' ? 'bg-cyan-700 hover:bg-cyan-600 border-cyan-500' : 'bg-purple-700 hover:bg-purple-600 border-purple-500') + ' text-white shadow-lg'
+                : 'bg-slate-900 text-slate-600 cursor-not-allowed border-slate-800'}
+            `}
+          >
+              <div className="flex items-center gap-1 mb-0.5">
+                  {(activeTab === 'STAFF' && state.freeRecruitAvailable) ? <Gift size={12} className="animate-bounce text-yellow-400" /> : <Scan size={12} />}
+                  <span>SINGLE</span>
               </div>
-          )}
-      </button>
+              <span className={`text-[9px] font-mono opacity-80 ${(activeTab === 'STAFF' && state.freeRecruitAvailable) ? 'text-yellow-300 font-bold' : ''}`}>
+                  {(activeTab === 'STAFF' && state.freeRecruitAvailable) ? 'FREE' : `${singleCost} GEMS`}
+              </span>
+          </button>
+
+          {/* Batch Pull Button */}
+          <button
+            onClick={() => pullGacha(10)}
+            disabled={animating || !canAffordBatch}
+            className={`
+                flex-1 relative overflow-hidden py-3 rounded font-bold text-xs tracking-wider flex flex-col items-center justify-center transition-all group border
+                ${(!animating && canAffordBatch)
+                ? (activeTab === 'STAFF' ? 'bg-cyan-800 hover:bg-cyan-700 border-cyan-500' : 'bg-purple-800 hover:bg-purple-700 border-purple-500') + ' text-white shadow-lg'
+                : 'bg-slate-900 text-slate-600 cursor-not-allowed border-slate-800'}
+            `}
+          >
+              <div className="flex items-center gap-1 mb-0.5">
+                  <Grid3X3 size={12} />
+                  <span>BATCH x10</span>
+              </div>
+              <span className="text-[9px] font-mono opacity-80">
+                  {batchCost} GEMS
+              </span>
+          </button>
+      </div>
 
       {/* Footer Info */}
-      <div className="mt-auto w-full border-t border-slate-800 bg-slate-950/50 py-2 overflow-hidden">
+      <div className="mt-auto w-full border-t border-slate-800 bg-slate-950/50 py-2 overflow-hidden shrink-0">
           <div className="flex justify-center space-x-6 text-[10px] font-mono text-slate-500">
               <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>R: 70%</span>
               <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>SR: 25%</span>

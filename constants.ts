@@ -1,4 +1,5 @@
 
+
 import { Staff, Contract, Faction, ContractModifier, FactionRank, ResearchDefinition, Creature, CyclePhase, FertilityLevel } from './types';
 
 export const INITIAL_RESOURCES = {
@@ -236,13 +237,15 @@ export const generateContract = (faction: Faction, totalCompleted: number): Cont
   const finalCredits = Math.floor(baseCredits * repMultiplier * (0.9 + Math.random() * 0.2)); 
   const finalData = Math.floor(baseData * repMultiplier * (0.9 + Math.random() * 0.2));
   
+  // Improved Gem Logic for Early Game Balance
   let gemCount = 0;
   if (difficulty === 'Omega') gemCount = 15 + Math.floor(Math.random() * 15);
   else if (difficulty === 'Black Ops') gemCount = 8 + Math.floor(Math.random() * 8);
   else if (difficulty === 'Extreme') gemCount = 3 + Math.floor(Math.random() * 5);
-  else if (difficulty === 'High') gemCount = 1 + Math.floor(Math.random() * 2);
+  else if (difficulty === 'High') gemCount = 1 + Math.floor(Math.random() * 3); // Increased lower bound
+  else if (difficulty === 'Medium' && Math.random() < 0.25) gemCount = 1; // Chance for gems on Medium
   
-  if ((faction.id === 'void_syndicate' || faction.id === 'neon_covenant') && Math.random() < 0.2) gemCount += 1;
+  if ((faction.id === 'void_syndicate' || faction.id === 'neon_covenant') && Math.random() < 0.35) gemCount += 1; // Buffed chance
 
   const deposit = Math.floor(finalCredits * 0.10); 
   const titles = ['Data Extraction', 'Security Override', 'Pattern Analysis', 'Asset Recovery', 'Firewall Breach', 'Quantum Stabilization', 'Neural Mapping', 'Hazard Cleanup', 'Protocol Omega', 'Void Stare', 'Core Dump', 'System Shock', 'Mainframe Dive', 'Ghost Hunt', 'Logic Bomb', 'Zero Day', 'Encryption Break', 'Satellite Uplink', 'Memory Retrieval', 'Code Injection', 'Server Farm Raid', 'Bioshack Defense', 'AI Containment', 'Algorithm Training', 'Dark Web Scan', 'Signal Intercept'];

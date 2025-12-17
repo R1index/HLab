@@ -1,33 +1,29 @@
 
 import React, { useState } from 'react';
-import { GameState, Resources, GameBonuses, Contract } from '../types';
-import { Infinity, Clock, DollarSign, Gem, ShieldAlert, Play, Cpu, Server } from 'lucide-react';
+import { GameState, Contract } from '../types';
+import { Infinity, Clock, Play, ShieldAlert, Gem } from 'lucide-react';
 import { playSound, setMusicIntensity } from '../utils/audio';
-import { MiniGame } from '../components/mechanics/MiniGame';
 import { useFloatingText } from '../components/ui/FloatingTextOverlay';
 
 interface Props {
   state: GameState;
-  updateResources: (delta: Partial<Resources>) => void;
-  onCompleteContract: (contractId: string | Contract, success: boolean, score: number) => void;
-  bonuses: GameBonuses;
+  onStartProtocol: (contract: Contract) => void;
 }
 
-export const SimulationScreen: React.FC<Props> = ({ state, updateResources, onCompleteContract, bonuses }) => {
-    const [duration, setDuration] = useState<number | string>(60); // Allow string for empty input
-    const [activeContract, setActiveContract] = useState<Contract | null>(null);
+export const SimulationScreen: React.FC<Props> = ({ state, onStartProtocol }) => {
+    const [duration, setDuration] = useState<number | string>(60);
     const { spawnText } = useFloatingText();
 
-    const numericDuration = typeof duration === 'number' ? duration : 0;
+    const numericDuration = typeof duration === 'number' && !isNaN(duration) ? duration : 30;
     
-    // Cost calculation: Base 100/s + scaling factor based on duration.
-    // Longer simulations require more "stability power", increasing the cost per second slightly.
-    const costPerSecond = Math.floor(100 + (numericDuration * 0.15));
-    const totalCost = numericDuration * costPerSecond;
+    // Balanced Cost calculation: Exponential based on duration to prevent cheap AFK farming
+    // Formula: Floor(Duration * 50 * (1.1 ^ (Duration / 60)))
+    // 60s = 3000 * 1.1 = 3300
+    // 600s = 30000 * (1.1^10) = 30000 * 2.59 = ~77000
+    const totalCost = Math.floor(numericDuration * 50 * Math.pow(1.1, numericDuration / 60));
+    const costPerSecond = Math.floor(totalCost / numericDuration);
     
     const canAfford = state.resources.credits >= totalCost;
-    
-    // Validate range for button state
     const isValidDuration = numericDuration >= 30 && numericDuration <= 600;
 
     const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +45,7 @@ export const SimulationScreen: React.FC<Props> = ({ state, updateResources, onCo
     const handleStart = () => {
         if (!canAfford) {
             playSound('fail');
-            spawnText(window.innerWidth/2, window.innerHeight/2, "INSUFFICIENT CREDITS", "text-red-500", "lg");
+            spawnText(window.innerWidth/2, window.innerHeight / 2, "INSUFFICIENT CREDITS", "text-red-500", "lg");
             return;
         }
 
@@ -58,7 +54,7 @@ export const SimulationScreen: React.FC<Props> = ({ state, updateResources, onCo
              return;
         }
 
-        updateResources({ credits: -totalCost });
+        // Logic handled in store now for resource deduction
         playSound('click');
         spawnText(window.innerWidth/2, window.innerHeight/2, `-${totalCost} CR`, "text-red-400", "md");
 
@@ -83,58 +79,9 @@ export const SimulationScreen: React.FC<Props> = ({ state, updateResources, onCo
 
         setTimeout(() => {
             setMusicIntensity('high');
-            setActiveContract(infiniteContract);
+            onStartProtocol(infiniteContract);
         }, 300);
     };
-
-    const handleGameComplete = (success: boolean, score: number) => {
-        setMusicIntensity('normal');
-        if (activeContract) {
-            // Success in simulation means surviving the duration. 
-            // Reward is data based on score. Scaled x5 since base scores were nerfed to ~1-5.
-            const dataReward = Math.floor(score * 5 * bonuses.dataMult);
-            updateResources({ data: dataReward });
-            
-            const cx = window.innerWidth / 2;
-            const cy = window.innerHeight / 2;
-            setTimeout(() => spawnText(cx, cy, `+${dataReward} DATA`, "text-cyan-400", "lg"), 300);
-            
-            // Pass the FULL contract object, not just ID, so the store can process XP
-            onCompleteContract(activeContract, true, score);
-        }
-        setActiveContract(null);
-    };
-
-    if (activeContract) {
-        return (
-            <div className="h-full flex flex-col animate-in fade-in duration-300">
-                 <div className="mb-4 flex items-center justify-between p-3 rounded-lg border backdrop-blur-sm bg-purple-950/80 border-purple-800">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-purple-300 font-mono">SIMULATION ACTIVE</span>
-                        <h2 className="text-lg font-bold text-white flex items-center">
-                            DEEP DIVE
-                            <Infinity size={16} className="ml-2 text-purple-400 animate-pulse" />
-                        </h2>
-                    </div>
-                    <button 
-                        onClick={() => { setActiveContract(null); setMusicIntensity('normal'); }}
-                        className="px-4 py-2 text-xs font-bold text-red-400 hover:text-white border border-red-900/50 rounded hover:bg-red-600 transition-colors"
-                    >
-                        ABORT
-                    </button>
-                </div>
-                <div className="flex-1 border border-purple-900 rounded-xl bg-slate-950 relative overflow-hidden shadow-2xl">
-                    <MiniGame 
-                        contract={activeContract} 
-                        bonuses={bonuses} 
-                        onComplete={handleGameComplete} 
-                        updateResources={updateResources}
-                        currentResources={state.resources}
-                    />
-                </div>
-            </div>
-        )
-    }
 
     return (
         <div className="h-full flex flex-col items-center justify-center animate-in fade-in duration-500">
@@ -206,7 +153,7 @@ export const SimulationScreen: React.FC<Props> = ({ state, updateResources, onCo
                          <div className="flex flex-col">
                              <span className="text-[10px] text-slate-500 uppercase">Required Investment</span>
                              <div className="flex items-center gap-1 text-[10px] text-purple-400">
-                                 {costPerSecond} CR / SEC
+                                 ~{costPerSecond} CR / SEC
                              </div>
                          </div>
                          <div className={`text-2xl font-bold font-mono flex items-center ${canAfford ? 'text-white' : 'text-red-500'}`}>
