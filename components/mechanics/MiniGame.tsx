@@ -56,18 +56,18 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     [contract.modifiers]
   );
 
-  const modifierIds = modifiersWithMeta.map(m => m.id);
+  const modifierSet = useMemo(() => new Set(modifiersWithMeta.map(m => m.id)), [modifiersWithMeta]);
 
-  const isVolatile = modifierIds.includes('volatile');
-  const isChaos = modifierIds.includes('chaos');
-  const isHardened = modifierIds.includes('hardened');
-  const isFragile = modifierIds.includes('fragile');
-  const isPrecision = modifierIds.includes('precision');
-  const isBureaucracy = modifierIds.includes('bureaucracy');
-  const isBombardment = modifierIds.includes('bombardment');
-  const isReplicator = modifierIds.includes('replicator');
-  const isStealth = modifierIds.includes('stealth');
-  const isShielded = modifierIds.includes('shielded');
+  const isVolatile = modifierSet.has('volatile');
+  const isChaos = modifierSet.has('chaos');
+  const isHardened = modifierSet.has('hardened');
+  const isFragile = modifierSet.has('fragile');
+  const isPrecision = modifierSet.has('precision');
+  const isBureaucracy = modifierSet.has('bureaucracy');
+  const isBombardment = modifierSet.has('bombardment');
+  const isReplicator = modifierSet.has('replicator');
+  const isStealth = modifierSet.has('stealth');
+  const isShielded = modifierSet.has('shielded');
 
   useEffect(() => {
       isMountedRef.current = true;
