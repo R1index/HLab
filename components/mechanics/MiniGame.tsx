@@ -44,7 +44,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   });
 
   const [, setTick] = useState(0); 
-  const [hoveredModifier, setHoveredModifier] = useState<{ id: string, rect: DOMRect } | null>(null);
+  const [hoveredModifier, setHoveredModifier] = useState<{ id: string; rect: DOMRect; meta: ReturnType<typeof getModifierMeta> } | null>(null);
   const { spawnText } = useFloatingText();
   const frameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -617,11 +617,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                         `}
                         onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredModifier({id: m, rect});
+                            setHoveredModifier({ id: m, rect, meta: getModifierMeta(m) });
                         }}
                         onMouseLeave={() => setHoveredModifier(null)}
                       >
-                              <info.icon size={20} className={info.textColor} />
+                          <info.icon size={20} className={info.textColor} />
                       </div>
                   );
               })}
@@ -637,11 +637,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                  transform: 'translate(-50%, -100%) translateY(-12px)'
              }}
          >
-                 <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${getModifierMeta(hoveredModifier.id).textColor}`}>
-                     {getModifierMeta(hoveredModifier.id).title}
+                 <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${hoveredModifier.meta.textColor}`}>
+                     {hoveredModifier.meta.title}
                  </div>
                  <div className="text-[10px] text-slate-300 leading-relaxed font-mono">
-                     {getModifierMeta(hoveredModifier.id).description}
+                     {hoveredModifier.meta.description}
                  </div>
              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-slate-700"></div>
          </div>,

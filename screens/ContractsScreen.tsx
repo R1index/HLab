@@ -225,7 +225,7 @@ const ContractCard = React.memo(({
     onStart: (c: Contract) => void,
     onTradeStart: (c: Contract) => void,
     isAccepting: boolean,
-    onHoverMod: (id: string, mod: ContractModifier | null, rect?: DOMRect) => void,
+  onHoverMod: (id: string, mod: ContractModifier | null, rect?: DOMRect) => void,
     currentCredits: number,
     hasTradeAsset?: boolean
 }) => {
@@ -433,7 +433,7 @@ const ContractCard = React.memo(({
 
 export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFulfillTrade, bonuses }) => {
   const [selectedFactionId, setSelectedFactionId] = useState<string>(Object.keys(state.factions)[0]);
-  const [hoveredModifier, setHoveredModifier] = useState<{id: string, mod: ContractModifier, rect: DOMRect} | null>(null);
+  const [hoveredModifier, setHoveredModifier] = useState<{id: string; mod: ContractModifier; rect: DOMRect; meta: ReturnType<typeof getModifierMeta>} | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
   
   // Trade Modal State
@@ -470,7 +470,7 @@ export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFul
   }, [isAccepting, state.resources.credits, onStartContract, spawnText]);
 
   const handleHoverMod = useCallback((id: string, mod: ContractModifier | null, rect?: DOMRect) => {
-      setHoveredModifier(mod && rect ? {id, mod, rect} : null);
+      setHoveredModifier(mod && rect ? { id, mod, rect, meta: getModifierMeta(mod) } : null);
   }, []);
 
   // --- Trade Logic ---
@@ -658,11 +658,11 @@ export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFul
              }}
          >
              <div className="flex items-center gap-2 mb-1.5 border-b border-slate-800 pb-1.5">
-                  {getModifierIcon(hoveredModifier.mod)}
-                  <span className="font-bold text-slate-200 text-xs uppercase tracking-wider">{hoveredModifier.mod}</span>
+                  <hoveredModifier.meta.icon size={14} className={hoveredModifier.meta.textColor} />
+                  <span className="font-bold text-slate-200 text-xs uppercase tracking-wider">{hoveredModifier.meta.title}</span>
               </div>
               <div className="text-slate-400 text-[10px] leading-relaxed font-mono">
-                  {getModifierDetails(hoveredModifier.mod)}
+                  {hoveredModifier.meta.description}
               </div>
          </div>,
          document.body
