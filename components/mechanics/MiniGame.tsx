@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import type { Contract, GameBonuses, MiniGameCellType, Resources } from '../../types';
+import type { Contract, ContractModifier, GameBonuses, MiniGameCellType, Resources } from '../../types';
 import { playSound, setMusicIntensity } from '../../utils/audio';
 import { AlertTriangle, Bug, CheckCircle, FileWarning, Flame, Gem, LogOut, Pause, Play, Shield, XCircle } from 'lucide-react';
 import { useFloatingText } from '../ui/FloatingTextOverlay';
@@ -44,23 +44,30 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   });
 
   const [, setTick] = useState(0); 
-  const [hoveredModifier, setHoveredModifier] = useState<{ id: string; rect: DOMRect; meta: ReturnType<typeof getModifierMeta> } | null>(null);
+  const [hoveredModifier, setHoveredModifier] = useState<{ id: ContractModifier; rect: DOMRect; meta: ReturnType<typeof getModifierMeta> } | null>(null);
   const { spawnText } = useFloatingText();
   const frameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const lastRenderTimeRef = useRef<number>(0); 
   const isMountedRef = useRef(true);
 
-  const isVolatile = contract.modifiers.includes('volatile');
-  const isChaos = contract.modifiers.includes('chaos');
-  const isHardened = contract.modifiers.includes('hardened');
-  const isFragile = contract.modifiers.includes('fragile');
-  const isPrecision = contract.modifiers.includes('precision');
-  const isBureaucracy = contract.modifiers.includes('bureaucracy');
-  const isBombardment = contract.modifiers.includes('bombardment');
-  const isReplicator = contract.modifiers.includes('replicator');
-  const isStealth = contract.modifiers.includes('stealth');
-  const isShielded = contract.modifiers.includes('shielded');
+  const modifiersWithMeta = useMemo(
+    () => contract.modifiers.map(m => ({ id: m as ContractModifier, meta: getModifierMeta(m as ContractModifier) })),
+    [contract.modifiers]
+  );
+
+  const modifierIds = modifiersWithMeta.map(m => m.id);
+
+  const isVolatile = modifierIds.includes('volatile');
+  const isChaos = modifierIds.includes('chaos');
+  const isHardened = modifierIds.includes('hardened');
+  const isFragile = modifierIds.includes('fragile');
+  const isPrecision = modifierIds.includes('precision');
+  const isBureaucracy = modifierIds.includes('bureaucracy');
+  const isBombardment = modifierIds.includes('bombardment');
+  const isReplicator = modifierIds.includes('replicator');
+  const isStealth = modifierIds.includes('stealth');
+  const isShielded = modifierIds.includes('shielded');
 
   useEffect(() => {
       isMountedRef.current = true;
@@ -604,24 +611,23 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         ))}
       </div>
 
-      {contract.modifiers.length > 0 && (
+      {modifiersWithMeta.length > 0 && (
           <div className="mt-6 flex flex-wrap justify-center gap-3 w-full max-w-sm relative z-10">
-              {contract.modifiers.map(m => {
-                  const info = getModifierMeta(m);
+              {modifiersWithMeta.map(({ id, meta }) => {
                   return (
                       <div 
-                        key={m}
+                        key={id}
                         className={`
                             relative group p-3 rounded-xl border-2 transition-all duration-200 cursor-help
-                            ${info.colorClass} bg-opacity-20 hover:bg-opacity-40 hover:scale-110 hover:shadow-[0_0_15px_rgba(0,0,0,0.5)]
+                            ${meta.colorClass} bg-opacity-20 hover:bg-opacity-40 hover:scale-110 hover:shadow-[0_0_15px_rgba(0,0,0,0.5)]
                         `}
                         onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredModifier({ id: m, rect, meta: getModifierMeta(m) });
+                            setHoveredModifier({ id, rect, meta });
                         }}
                         onMouseLeave={() => setHoveredModifier(null)}
                       >
-                          <info.icon size={20} className={info.textColor} />
+                          <meta.icon size={20} className={meta.textColor} />
                       </div>
                   );
               })}
