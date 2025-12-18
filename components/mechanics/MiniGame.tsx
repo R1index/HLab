@@ -1,14 +1,11 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Contract, GameBonuses, MiniGameCellType, Resources } from '../../types';
+import type { Contract, ContractModifier, GameBonuses, MiniGameCellType, Resources } from '../../types';
 import { playSound, setMusicIntensity } from '../../utils/audio';
-import { 
-    AlertTriangle, CheckCircle, XCircle, Zap, ShieldAlert, Crosshair, 
-    ShieldOff, Flame, Pause, Clock, Layers, Star, FileWarning, Bomb, Bug,
-    EyeOff, Shield, Infinity, Gem, X, Play, LogOut
-} from 'lucide-react';
+import { AlertTriangle, Bug, CheckCircle, FileWarning, Flame, Gem, LogOut, Pause, Play, Shield, XCircle } from 'lucide-react';
 import { useFloatingText } from '../ui/FloatingTextOverlay';
+import { getModifierMeta } from '../../utils/modifiers';
 
 interface MiniGameProps {
   contract: Contract;
@@ -16,7 +13,6 @@ interface MiniGameProps {
   onComplete: (success: boolean, score: number) => void;
   onAbandon?: () => void;
   updateResources?: (delta: Partial<Resources>) => void;
-  currentResources?: Resources;
 }
 
 interface Cell {
@@ -28,31 +24,6 @@ interface Cell {
   maxLife: number; // Life in MS
   life: number; // Life in MS
 }
-
-const getModifierInfo = (mod: string) => {
-    let icon = <ShieldAlert size={20} />;
-    let desc = 'Unknown anomaly';
-    let title = mod;
-    let colorClass = 'border-slate-700 text-slate-400 bg-slate-900';
-    let textColor = 'text-slate-400';
-
-    switch(mod) {
-        case 'chaos': icon=<Zap size={20}/>; desc='Spawns are erratic'; colorClass='border-yellow-500/50 text-yellow-400 bg-yellow-950'; textColor='text-yellow-400'; break;
-        case 'precision': icon=<Crosshair size={20}/>; desc='Misses deal 5x damage'; colorClass='border-red-500/50 text-red-400 bg-red-950'; textColor='text-red-400'; break;
-        case 'fragile': icon=<ShieldOff size={20}/>; desc='Stability regen disabled'; colorClass='border-orange-500/50 text-orange-400 bg-orange-950'; textColor='text-orange-400'; break;
-        case 'volatile': icon=<AlertTriangle size={20}/>; desc='Explosive targets'; colorClass='border-red-500 text-red-500 bg-red-950'; textColor='text-red-500'; break;
-        case 'hardened': icon=<ShieldAlert size={20}/>; desc='Reinforced targets'; colorClass='border-slate-400 text-slate-300 bg-slate-800'; textColor='text-slate-300'; break;
-        case 'rushed': icon=<Clock size={20}/>; desc='+20% Spawn rate'; colorClass='border-cyan-500/50 text-cyan-400 bg-cyan-950'; textColor='text-cyan-400'; break;
-        case 'dense': icon=<Layers size={20}/>; desc='Grid density increased'; colorClass='border-purple-500/50 text-purple-400 bg-purple-950'; textColor='text-purple-400'; break;
-        case 'lucky': icon=<Star size={20}/>; desc='High value targets'; colorClass='border-green-500/50 text-green-400 bg-green-950'; textColor='text-green-400'; break;
-        case 'bureaucracy': icon=<FileWarning size={20}/>; desc='Red Tape appears'; colorClass='border-blue-500/50 text-blue-400 bg-blue-950'; textColor='text-blue-400'; break;
-        case 'bombardment': icon=<Bomb size={20}/>; desc='Time Bombs appear'; colorClass='border-red-500/70 text-red-400 bg-red-900/40'; textColor='text-red-400'; break;
-        case 'replicator': icon=<Bug size={20}/>; desc='Viruses multiply rapidly'; colorClass='border-emerald-500/50 text-emerald-400 bg-emerald-950'; textColor='text-emerald-400'; break;
-        case 'stealth': icon=<EyeOff size={20}/>; desc='Targets flicker invisibly'; colorClass='border-slate-500 text-white bg-black'; textColor='text-white'; break;
-        case 'shielded': icon=<Shield size={20}/>; desc='Targets have heavy shields (4-5 clicks)'; colorClass='border-blue-500 text-blue-300 bg-blue-950'; textColor='text-blue-300'; break;
-    }
-    return { icon, title, desc, colorClass, textColor };
-};
 
 export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplete, onAbandon, updateResources }) => {
   const [currentGridSize, setCurrentGridSize] = useState(contract.isInfinite ? 3 : (contract.gridSize || 4));
@@ -73,23 +44,30 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
   });
 
   const [, setTick] = useState(0); 
-  const [hoveredModifier, setHoveredModifier] = useState<{ id: string, rect: DOMRect } | null>(null);
+  const [hoveredModifier, setHoveredModifier] = useState<{ id: ContractModifier; rect: DOMRect; meta: ReturnType<typeof getModifierMeta> } | null>(null);
   const { spawnText } = useFloatingText();
   const frameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const lastRenderTimeRef = useRef<number>(0); 
   const isMountedRef = useRef(true);
 
-  const isVolatile = contract.modifiers.includes('volatile');
-  const isChaos = contract.modifiers.includes('chaos');
-  const isHardened = contract.modifiers.includes('hardened');
-  const isFragile = contract.modifiers.includes('fragile');
-  const isPrecision = contract.modifiers.includes('precision');
-  const isBureaucracy = contract.modifiers.includes('bureaucracy');
-  const isBombardment = contract.modifiers.includes('bombardment');
-  const isReplicator = contract.modifiers.includes('replicator');
-  const isStealth = contract.modifiers.includes('stealth');
-  const isShielded = contract.modifiers.includes('shielded');
+  const modifiersWithMeta = useMemo(
+    () => contract.modifiers.map(m => ({ id: m as ContractModifier, meta: getModifierMeta(m as ContractModifier) })),
+    [contract.modifiers]
+  );
+
+  const modifierSet = useMemo(() => new Set(modifiersWithMeta.map(m => m.id)), [modifiersWithMeta]);
+
+  const isVolatile = modifierSet.has('volatile');
+  const isChaos = modifierSet.has('chaos');
+  const isHardened = modifierSet.has('hardened');
+  const isFragile = modifierSet.has('fragile');
+  const isPrecision = modifierSet.has('precision');
+  const isBureaucracy = modifierSet.has('bureaucracy');
+  const isBombardment = modifierSet.has('bombardment');
+  const isReplicator = modifierSet.has('replicator');
+  const isStealth = modifierSet.has('stealth');
+  const isShielded = modifierSet.has('shielded');
 
   useEffect(() => {
       isMountedRef.current = true;
@@ -121,9 +99,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
 
     if (isMountedRef.current) setTick(t => t + 1);
     playSound(win || contract.isInfinite ? 'success' : 'fail');
-    if (!win && !contract.isInfinite) {
-        setMusicIntensity('normal');
-    }
+    setMusicIntensity('normal');
   }, [contract.isInfinite]);
 
   const togglePause = () => {
@@ -635,45 +611,44 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         ))}
       </div>
 
-      {contract.modifiers.length > 0 && (
+      {modifiersWithMeta.length > 0 && (
           <div className="mt-6 flex flex-wrap justify-center gap-3 w-full max-w-sm relative z-10">
-              {contract.modifiers.map(m => {
-                  const info = getModifierInfo(m);
+              {modifiersWithMeta.map(({ id, meta }) => {
                   return (
                       <div 
-                        key={m}
+                        key={id}
                         className={`
                             relative group p-3 rounded-xl border-2 transition-all duration-200 cursor-help
-                            ${info.colorClass} bg-opacity-20 hover:bg-opacity-40 hover:scale-110 hover:shadow-[0_0_15px_rgba(0,0,0,0.5)]
+                            ${meta.colorClass} bg-opacity-20 hover:bg-opacity-40 hover:scale-110 hover:shadow-[0_0_15px_rgba(0,0,0,0.5)]
                         `}
                         onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredModifier({id: m, rect});
+                            setHoveredModifier({ id, rect, meta });
                         }}
                         onMouseLeave={() => setHoveredModifier(null)}
                       >
-                          {info.icon}
+                          <meta.icon size={20} className={meta.textColor} />
                       </div>
                   );
               })}
           </div>
       )}
 
-      {hoveredModifier && createPortal(
-          <div 
-             className="fixed z-[9999] w-48 bg-slate-950/95 backdrop-blur-xl border border-slate-700 p-3 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] pointer-events-none animate-in fade-in zoom-in-95 duration-150"
-             style={{
-                 top: Math.max(10, hoveredModifier.rect.top), 
-                 left: Math.min(window.innerWidth - 200, Math.max(10, hoveredModifier.rect.left + (hoveredModifier.rect.width/2))),
+          {hoveredModifier && createPortal(
+              <div 
+                 className="fixed z-[9999] w-48 bg-slate-950/95 backdrop-blur-xl border border-slate-700 p-3 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                 style={{
+                     top: Math.max(10, hoveredModifier.rect.top), 
+                     left: Math.min(window.innerWidth - 200, Math.max(10, hoveredModifier.rect.left + (hoveredModifier.rect.width/2))),
                  transform: 'translate(-50%, -100%) translateY(-12px)'
              }}
          >
-             <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${getModifierInfo(hoveredModifier.id).textColor}`}>
-                 {getModifierInfo(hoveredModifier.id).title}
-             </div>
-             <div className="text-[10px] text-slate-300 leading-relaxed font-mono">
-                 {getModifierInfo(hoveredModifier.id).desc}
-             </div>
+                 <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${hoveredModifier.meta.textColor}`}>
+                     {hoveredModifier.meta.title}
+                 </div>
+                 <div className="text-[10px] text-slate-300 leading-relaxed font-mono">
+                     {hoveredModifier.meta.description}
+                 </div>
              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-slate-700"></div>
          </div>,
          document.body
