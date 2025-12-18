@@ -1,18 +1,18 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Contract, GameState, Faction, GameBonuses, Resources, Creature } from '../types';
+import { Contract, GameState, Faction, GameBonuses, Resources, Creature, ContractModifier } from '../types';
 import { FACTION_LEADERS, getAnimeAvatarUrl, FACTION_RANK_BONUSES, FACTION_STYLES, CREATURE_DB } from '../constants';
 import { 
-    Clock, Database, ShieldAlert, Target, 
-    Zap, ShieldOff, Crosshair, AlertTriangle, Lock, 
-    Layers, Star, FileWarning, Bomb, Bug, Shield, EyeOff,
+    Clock, Crosshair, Database, EyeOff, Shield, ShieldAlert, Target, Zap,
+    Lock, 
     Skull, ChevronRight, LockKeyhole, Signal, Globe, Radio, Hexagon, X, Briefcase, CheckCircle2,
     TrendingUp, Timer, AlertOctagon, DollarSign, Gem, PackageCheck
 } from 'lucide-react';
 import { playSound, setMusicIntensity } from '../utils/audio';
 import { Avatar } from '../components/ui/Avatar';
 import { useFloatingText } from '../components/ui/FloatingTextOverlay';
+import { getModifierMeta } from '../utils/modifiers';
 
 interface Props {
   state: GameState;
@@ -51,45 +51,13 @@ const FACTION_GRADIENTS: Record<string, string> = {
     fuchsia: '#d946ef'
 };
 
-const getModifierIcon = (mod: string) => {
-    switch(mod) {
-        case 'chaos': return <Zap size={14} className="text-yellow-400" />;
-        case 'precision': return <Crosshair size={14} className="text-red-400" />;
-        case 'fragile': return <ShieldOff size={14} className="text-orange-400" />;
-        case 'volatile': return <AlertTriangle size={14} className="text-red-500" />;
-        case 'hardened': return <ShieldAlert size={14} className="text-slate-300" />;
-        case 'rushed': return <Clock size={14} className="text-cyan-400" />;
-        case 'dense': return <Layers size={14} className="text-purple-400" />;
-        case 'lucky': return <Star size={14} className="text-green-400" />;
-        case 'glitch': return <Zap size={14} className="text-fuchsia-400" />;
-        case 'bureaucracy': return <FileWarning size={14} className="text-blue-400" />;
-        case 'bombardment': return <Bomb size={14} className="text-red-500" />;
-        case 'replicator': return <Bug size={14} className="text-emerald-400" />;
-        case 'stealth': return <EyeOff size={14} className="text-slate-200" />;
-        case 'shielded': return <Shield size={14} className="text-blue-400" />;
-        default: return <ShieldAlert size={14} className="text-slate-400" />;
-    }
+const getModifierIcon = (mod: ContractModifier) => {
+    const meta = getModifierMeta(mod);
+    const Icon = meta.icon;
+    return <Icon size={14} className={meta.textColor} />;
 };
 
-const getModifierDetails = (mod: string) => {
-    switch(mod) {
-        case 'chaos': return 'Spawns are erratic and fast';
-        case 'precision': return 'Misses deal 5x damage';
-        case 'fragile': return 'Stability regen disabled';
-        case 'volatile': return 'Explosive targets deal 2x dmg';
-        case 'hardened': return 'Targets need extra clicks';
-        case 'rushed': return '+20% Spawn rate';
-        case 'dense': return 'Grid density increased';
-        case 'lucky': return 'High value targets appear more often';
-        case 'glitch': return 'Targets shift position unexpectedly';
-        case 'bureaucracy': return 'Red Tape hurts score if ignored';
-        case 'bombardment': return 'Bombs explode for massive damage';
-        case 'replicator': return 'Viruses multiply if not purged';
-        case 'stealth': return 'Targets are partially invisible';
-        case 'shielded': return 'Targets have heavy shields (4-5 clicks)';
-        default: return 'Standard anomaly';
-    }
-};
+const getModifierDetails = (mod: ContractModifier) => getModifierMeta(mod).description;
 
 // --- Components ---
 
@@ -257,7 +225,7 @@ const ContractCard = React.memo(({
     onStart: (c: Contract) => void,
     onTradeStart: (c: Contract) => void,
     isAccepting: boolean,
-    onHoverMod: (id: string, mod: string, rect: DOMRect) => void,
+    onHoverMod: (id: string, mod: ContractModifier | null, rect?: DOMRect) => void,
     currentCredits: number,
     hasTradeAsset?: boolean
 }) => {
@@ -389,7 +357,7 @@ const ContractCard = React.memo(({
                               <div 
                                 key={mod}
                                 onMouseEnter={(e) => onHoverMod(contract.id, mod, e.currentTarget.getBoundingClientRect())}
-                                onMouseLeave={() => onHoverMod(contract.id, '', new DOMRect())}
+                                onMouseLeave={() => onHoverMod(contract.id, null)}
                                 className="p-1 rounded bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 cursor-help transition-colors"
                             >
                                 {getModifierIcon(mod)}
@@ -465,7 +433,7 @@ const ContractCard = React.memo(({
 
 export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFulfillTrade, bonuses }) => {
   const [selectedFactionId, setSelectedFactionId] = useState<string>(Object.keys(state.factions)[0]);
-  const [hoveredModifier, setHoveredModifier] = useState<{id: string, mod: string, rect: DOMRect} | null>(null);
+  const [hoveredModifier, setHoveredModifier] = useState<{id: string, mod: ContractModifier, rect: DOMRect} | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
   
   // Trade Modal State
@@ -501,8 +469,8 @@ export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFul
     }, 300);
   }, [isAccepting, state.resources.credits, onStartContract, spawnText]);
 
-  const handleHoverMod = useCallback((id: string, mod: string, rect: DOMRect) => {
-      setHoveredModifier(mod ? {id, mod, rect} : null);
+  const handleHoverMod = useCallback((id: string, mod: ContractModifier | null, rect?: DOMRect) => {
+      setHoveredModifier(mod && rect ? {id, mod, rect} : null);
   }, []);
 
   // --- Trade Logic ---
