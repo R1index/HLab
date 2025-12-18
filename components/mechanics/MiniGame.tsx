@@ -6,7 +6,7 @@ import { playSound, setMusicIntensity } from '../../utils/audio';
 import { 
     AlertTriangle, CheckCircle, XCircle, Zap, ShieldAlert, Crosshair, 
     ShieldOff, Flame, Pause, Clock, Layers, Star, FileWarning, Bomb, Bug,
-    EyeOff, Shield, Infinity, Gem, X
+    EyeOff, Shield, Infinity, Gem, X, Play, LogOut
 } from 'lucide-react';
 import { useFloatingText } from '../ui/FloatingTextOverlay';
 
@@ -126,6 +126,14 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     }
   }, [contract.isInfinite]);
 
+  const togglePause = () => {
+    const s = stateRef.current;
+    if (s.result) return;
+    s.paused = !s.paused;
+    playSound('click');
+    if (isMountedRef.current) setTick(t => t + 1);
+  };
+
   const breakCombo = (rect?: DOMRect) => {
       const s = stateRef.current;
       if (s.combo > 5) playSound('fail');
@@ -156,10 +164,10 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
       let life = 2000; 
 
       if (contract.isInfinite) {
-          // Infinite Mode Spawn Logic - All types enabled based on elapsed time (difficulty scaling)
-          const highTierUnlock = elapsed > 45; // Start seeing harder stuff after 45s
+          const elapsed = contract.durationSeconds - s.timeLeft;
+          const highTierUnlock = elapsed > 45; 
           
-          if (Math.random() < 0.03) { type = 'gem_node'; life = 1500; } // 3% chance for Gem
+          if (Math.random() < 0.03) { type = 'gem_node'; life = 1500; } 
           else if (Math.random() < 0.05) { type = 'red_tape'; life = 2500; }
           else if (highTierUnlock && Math.random() < 0.05) { type = 'time_bomb'; life = 1600; }
           else if (highTierUnlock && Math.random() < 0.05) { type = 'virus'; life = 2300; }
@@ -168,12 +176,10 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
           else if (Math.random() < 0.15) { type = 'critical'; life = 1300; }
           else if (Math.random() < 0.2) { type = 'tough'; clicks = 2; life = 3000; }
           
-          // Life decreases as time goes on in infinite mode to increase difficulty
-          const speedFactor = Math.min(0.6, elapsed / 300); // up to 60% faster life drain
+          const speedFactor = Math.min(0.6, elapsed / 300); 
           life = life * (1 - speedFactor);
 
       } else {
-          // Standard Contract Logic
           if (isBureaucracy && Math.random() < 0.20) { type = 'red_tape'; life = 2500; }
           else if (isBombardment && Math.random() < 0.15) { type = 'time_bomb'; life = 1600; }
           else if (isReplicator && Math.random() < 0.15) { type = 'virus'; life = 2300; }
@@ -204,11 +210,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     lastTimeRef.current = timestamp;
 
     if (!s.gameActive || s.result || s.paused) {
-         if(s.paused && isMountedRef.current) frameRef.current = requestAnimationFrame(gameLoop);
+         if((s.paused || s.result) && isMountedRef.current) frameRef.current = requestAnimationFrame(gameLoop);
          return;
     }
 
-    if (dt > 100) dt = 100; // Cap dt to prevent massive jumps on lag
+    if (dt > 100) dt = 100; 
 
     s.timeAccumulator += dt;
 
@@ -216,7 +222,6 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         s.timeLeft -= 1;
         
         if (contract.isInfinite) {
-            // Infinite mode difficulty scaling based on elapsed time
             const elapsed = contract.durationSeconds - s.timeLeft;
             let targetSize = currentGridSize;
 
@@ -231,27 +236,24 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
         }
 
         if (s.timeLeft <= 0) {
-            handleEnd(true); // Timeout in infinite mode or standard mode is success
+            handleEnd(true); 
             return;
         }
         s.timeAccumulator -= 1000;
     }
 
-    // Safely update cells without mutation during iteration
     const cellsToSpawn: Cell[] = [];
     let damage = 0;
     let scorePenalty = 0;
     let missedCell = false;
     let nextCells = [];
 
-    // Filter step
     for (const c of s.cells) {
         c.life -= dt;
         if (c.life > 0) {
             nextCells.push(c);
         } else {
-            // Expired logic
-            if (c.type === 'trap') { /* Good, trap expired */ }
+            if (c.type === 'trap') { }
             else if (c.type === 'gem_node') { missedCell = true; } 
             else if (c.type === 'red_tape') { scorePenalty += 3; playSound('fail'); missedCell = true; }
             else if (c.type === 'time_bomb') { damage += 30; playSound('fail'); missedCell = true; }
@@ -274,6 +276,12 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
     if (missedCell) s.combo = 0;
     if (damage > 0) s.stability = Math.max(0, s.stability - damage);
     if (scorePenalty > 0) s.score = Math.max(0, s.score - scorePenalty);
+
+    // CRITICAL CHECK: End game immediately if stability hit zero from expiration
+    if (s.stability <= 0) {
+        handleEnd(false); 
+        return;
+    }
     
     cellsToSpawn.forEach(newCell => {
         if (s.cells.length >= (currentGridSize * currentGridSize)) return;
@@ -296,11 +304,6 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
        s.stability = Math.min(bonuses.maxStability, s.stability + regenAmount);
     }
 
-    if (s.stability <= 0) {
-        handleEnd(false); 
-        return;
-    }
-    
     if (!contract.isInfinite && s.score >= contract.quota) {
         handleEnd(true);
         return;
@@ -371,6 +374,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
            
            s.processedClicks.add(cellId);
            setTimeout(() => s.processedClicks.delete(cellId), 200);
+
+           // IMMEDIATE CHECK: If stability reached zero, end now
+           if (s.stability <= 0) {
+               handleEnd(false);
+           }
            return;
       }
 
@@ -473,6 +481,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
       const rect = target.getBoundingClientRect();
       breakCombo(rect);
       spawnText(e.clientX, e.clientY, "MISS!", "text-red-500", "md");
+
+      // IMMEDIATE CHECK: Missed click killed the connection
+      if (s.stability <= 0) {
+          handleEnd(false);
+      }
   };
 
   const GridOverlay = useMemo(() => (
@@ -495,11 +508,11 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
       {/* MiniGame Top Info Bar */}
       <div className="w-full max-w-md grid grid-cols-3 gap-2 items-end mb-4 font-mono text-sm relative select-none mt-8">
         <div className="flex flex-col">
-            <span className="text-slate-400 text-xs">STABILITY</span>
+            <span className="text-slate-400 text-[10px] uppercase font-bold mb-1">Stability</span>
             <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700 relative">
                 <div 
                     className={`h-full transition-all duration-200 ${stability < 30 ? 'bg-red-500' : 'bg-cyan-500'}`} 
-                    style={{ width: `${Math.min(100, (stability / bonuses.maxStability) * 100)}%` }}
+                    style={{ width: `${Math.max(0, Math.min(100, (stability / bonuses.maxStability) * 100))}%` }}
                 />
             </div>
         </div>
@@ -516,17 +529,28 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                     </div>
                 </div>
             )}
-            <span className="text-slate-400 text-xs block">{contract.isInfinite ? 'DATA YIELD' : 'QUOTA'}</span>
-            <span className="text-2xl font-bold text-white">
+            <span className="text-slate-400 text-[10px] uppercase font-bold block mb-1">{contract.isInfinite ? 'Data Yield' : 'Quota'}</span>
+            <span className="text-2xl font-bold text-white tracking-tighter">
                 {contract.isInfinite ? score : `${score} / ${contract.quota}`}
             </span>
         </div>
 
-        <div className="text-right">
-            <span className="text-slate-400 text-xs block">TIME LEFT</span>
-            <span className={`text-xl font-bold ${timeLeft < 10 ? 'text-red-400' : 'text-white'}`}>
-                {timeLeft}s
-            </span>
+        <div className="flex flex-col items-end">
+            <div className="flex gap-2 mb-1">
+                <button 
+                    onClick={(e) => { e.stopPropagation(); togglePause(); }}
+                    className="p-1.5 bg-slate-800 border border-slate-700 rounded text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                    title="Pause"
+                >
+                    {paused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
+                </button>
+            </div>
+            <div className="text-right">
+                <span className="text-slate-400 text-[10px] uppercase font-bold block mb-1">Time Left</span>
+                <span className={`text-xl font-bold font-mono ${timeLeft < 10 ? 'text-red-400' : 'text-white'}`}>
+                    {timeLeft}s
+                </span>
+            </div>
         </div>
       </div>
 
@@ -551,16 +575,16 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
 
         {paused && !result && (
             <div className="absolute inset-0 z-[80] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-auto"
-                 onClick={(e) => { e.stopPropagation(); stateRef.current.paused = false; if (isMountedRef.current) setTick(t=>t+1); }}>
+                 onClick={(e) => { e.stopPropagation(); togglePause(); }}>
                 <Pause size={48} className="text-cyan-400 mb-2" />
                 <span className="text-cyan-200 font-bold tracking-widest animate-pulse">SYSTEM PAUSED</span>
                 <span className="text-xs text-slate-500 mt-2">Tap to resume</span>
                 {onAbandon && (
                     <button 
                         onClick={(e) => { e.stopPropagation(); onAbandon(); setMusicIntensity('normal'); }}
-                        className="mt-6 px-4 py-2 border border-red-500/50 text-red-400 hover:bg-red-900/20 rounded text-xs font-bold"
+                        className="mt-6 px-4 py-2 bg-red-900/20 border border-red-500/50 text-red-400 hover:bg-red-600 hover:text-white rounded text-xs font-bold flex items-center gap-2 transition-all"
                     >
-                        ABORT MISSION
+                        <LogOut size={14} /> ABORT MISSION
                     </button>
                 )}
             </div>
