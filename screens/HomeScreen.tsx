@@ -75,7 +75,7 @@ export const HomeScreen: React.FC<Props> = ({ state, onSetTheme, onManualHack, o
 
         activeStaff.forEach(s => {
             const p = state.staffProgress[s.id];
-            if (p && (p.health || 100) > 0) {
+            if (p && (p.health ?? 100) > 0) {
                  const lvlMult = 1 + ((p.level - 1) * 0.1);
                  if (s.bonusType === 'data_mult') dataMult += (s.bonusValue * lvlMult);
             }
@@ -93,7 +93,7 @@ export const HomeScreen: React.FC<Props> = ({ state, onSetTheme, onManualHack, o
   }, [state.ownedCreatures, state.customCreatures, state.activeStaffIds, state.researchLevels, state.factions, state.staffProgress, activeStaff]);
 
   const diseasedStaffCount = state.ownedStaffIds.filter(id => state.staffProgress[id]?.disease).length;
-  const criticalStaffCount = state.ownedStaffIds.filter(id => (state.staffProgress[id]?.health || 100) <= 20).length;
+  const criticalStaffCount = state.ownedStaffIds.filter(id => (state.staffProgress[id]?.health ?? 100) <= 20).length;
 
   useEffect(() => {
     if (Date.now() - state.lastHackTime < 500) {

@@ -430,6 +430,7 @@ export const useGameStore = (onGameEvent?: (event: GameEvent) => void) => {
 
   const startProtocol = useCallback((contract: Contract) => {
       setState(prev => {
+          if (prev.activeProtocol) return prev;
           if (prev.resources.credits < contract.deposit) return prev;
           
           return {

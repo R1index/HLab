@@ -131,7 +131,6 @@ const AppContent = () => {
                      onComplete={store.completeContract}
                      onAbandon={store.abandonProtocol}
                      updateResources={store.updateResources}
-                     currentResources={store.state.resources}
                  />
              </div>
           </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Contract, GameBonuses, MiniGameCellType, Resources } from '../../types';
+import type { Contract, GameBonuses, MiniGameCellType, Resources } from '../../types';
 import { playSound, setMusicIntensity } from '../../utils/audio';
 import { 
     AlertTriangle, CheckCircle, XCircle, Zap, ShieldAlert, Crosshair, 
@@ -16,7 +16,6 @@ interface MiniGameProps {
   onComplete: (success: boolean, score: number) => void;
   onAbandon?: () => void;
   updateResources?: (delta: Partial<Resources>) => void;
-  currentResources?: Resources;
 }
 
 interface Cell {
@@ -121,9 +120,7 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
 
     if (isMountedRef.current) setTick(t => t + 1);
     playSound(win || contract.isInfinite ? 'success' : 'fail');
-    if (!win && !contract.isInfinite) {
-        setMusicIntensity('normal');
-    }
+    setMusicIntensity('normal');
   }, [contract.isInfinite]);
 
   const togglePause = () => {
