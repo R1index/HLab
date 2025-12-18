@@ -57,8 +57,6 @@ const getModifierIcon = (mod: ContractModifier) => {
     return <Icon size={14} className={meta.textColor} />;
 };
 
-const getModifierDetails = (mod: ContractModifier) => getModifierMeta(mod).description;
-
 // --- Components ---
 
 const FactionSelector = ({ 
