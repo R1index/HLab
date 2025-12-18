@@ -492,11 +492,12 @@ export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFul
   
   const eligibleCreatures = useMemo(() => {
       if (!selectedTradeContract) return [];
+      const statKey = (selectedTradeContract.tradeReqStat || 'strength') as keyof Creature;
+      const threshold = selectedTradeContract.tradeReqValue || 0;
       return ownedCreatures.filter(c => {
           if (c.type !== selectedTradeContract.tradeReqType) return false;
-          // @ts-ignore
-          const statVal = c[selectedTradeContract.tradeReqStat || 'strength'];
-          return statVal > (selectedTradeContract.tradeReqValue || 0);
+          const statVal = c[statKey];
+          return typeof statVal === 'number' && statVal > threshold;
       });
   }, [selectedTradeContract, ownedCreatures]);
 
@@ -551,11 +552,12 @@ export const ContractsScreen: React.FC<Props> = ({ state, onStartContract, onFul
                             // Check for trade asset availability without iterating inside component (optimization)
                             let hasTradeAsset = false;
                             if (contract.kind === 'TRADE') {
+                                const statKey = (contract.tradeReqStat || 'strength') as keyof Creature;
+                                const minVal = contract.tradeReqValue || 0;
                                 hasTradeAsset = ownedCreatures.some(c => {
                                     if (c.type !== contract.tradeReqType) return false;
-                                    // @ts-ignore
-                                    const val = c[contract.tradeReqStat || 'strength'];
-                                    return val > (contract.tradeReqValue || 0);
+                                    const val = c[statKey];
+                                    return typeof val === 'number' && val > minVal;
                                 });
                             }
                             

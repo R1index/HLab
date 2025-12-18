@@ -621,28 +621,28 @@ export const MiniGame: React.FC<MiniGameProps> = ({ contract, bonuses, onComplet
                         }}
                         onMouseLeave={() => setHoveredModifier(null)}
                       >
-                          {info.icon}
+                              <info.icon size={20} className={info.textColor} />
                       </div>
                   );
               })}
           </div>
       )}
 
-      {hoveredModifier && createPortal(
-          <div 
-             className="fixed z-[9999] w-48 bg-slate-950/95 backdrop-blur-xl border border-slate-700 p-3 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] pointer-events-none animate-in fade-in zoom-in-95 duration-150"
-             style={{
-                 top: Math.max(10, hoveredModifier.rect.top), 
-                 left: Math.min(window.innerWidth - 200, Math.max(10, hoveredModifier.rect.left + (hoveredModifier.rect.width/2))),
+          {hoveredModifier && createPortal(
+              <div 
+                 className="fixed z-[9999] w-48 bg-slate-950/95 backdrop-blur-xl border border-slate-700 p-3 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                 style={{
+                     top: Math.max(10, hoveredModifier.rect.top), 
+                     left: Math.min(window.innerWidth - 200, Math.max(10, hoveredModifier.rect.left + (hoveredModifier.rect.width/2))),
                  transform: 'translate(-50%, -100%) translateY(-12px)'
              }}
          >
-             <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${getModifierMeta(hoveredModifier.id).textColor}`}>
-                 {getModifierMeta(hoveredModifier.id).title}
-             </div>
-             <div className="text-[10px] text-slate-300 leading-relaxed font-mono">
-                 {getModifierMeta(hoveredModifier.id).description}
-             </div>
+                 <div className={`text-xs font-bold uppercase mb-1 tracking-wider ${getModifierMeta(hoveredModifier.id).textColor}`}>
+                     {getModifierMeta(hoveredModifier.id).title}
+                 </div>
+                 <div className="text-[10px] text-slate-300 leading-relaxed font-mono">
+                     {getModifierMeta(hoveredModifier.id).description}
+                 </div>
              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-slate-700"></div>
          </div>,
          document.body

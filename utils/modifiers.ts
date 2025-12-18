@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { ContractModifier } from '../types';
 import {
   AlertTriangle,
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 
 type ModifierMeta = {
-  icon: typeof ShieldAlert;
+  icon: ComponentType<{ size?: number; className?: string }>;
   title: string;
   description: string;
   colorClass: string;
